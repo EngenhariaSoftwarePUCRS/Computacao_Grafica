@@ -1,4 +1,4 @@
-# Aula 03 - Fundamentos Matemáticos para Computação Gráfica - 08/08/2023
+# Aula 03 e 04 - Fundamentos Matemáticos para Computação Gráfica - 08/08/2023 e 10/08/2023
 
 ### [Link para os slides](https://www.inf.pucrs.br/pinho/CG/SlidesEmPDF/FundamentosMatematicos.pdf)
 
@@ -70,3 +70,4 @@ Utiliza-se a multiplicação do vetor por um escalar para obter qualquer ponto d
 <u>Sequência</u> de vértices
 
 
+## Exercícios Foguete
