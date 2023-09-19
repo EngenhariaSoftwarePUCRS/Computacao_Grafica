@@ -54,6 +54,8 @@ int *CoresDosPoligonos;
 // Limites logicos da area de desenho
 Ponto Min, Max, PontoClicado;
 
+Ponto andante;
+
 bool desenha = false;
 bool FoiClicado = false;
 
@@ -119,6 +121,9 @@ void init()
     Voro.obtemLimites(Min,Max);
     Min.imprime("Minimo:", "\n");
     Max.imprime("Maximo:", "\n");
+
+    andante = Ponto(0, 0, 0);
+
     Voro.obtemVizinhosDasArestas();
 
     CoresDosPoligonos = new int[Voro.getNPoligonos()];
@@ -288,6 +293,7 @@ void display( void )
 
     }
 
+    DesenhaPonto(andante, 20);
     //Mapa.desenhaVertices();
     //glColor3f(1,0,0); // R, G, B  [0..1]
     //DesenhaLinha(Mapa.getVertice(0), Ponto(Min.x, Max.y));
@@ -316,6 +322,57 @@ void ContaTempo(double tempo)
         }
     }
 }
+bool pontoNoPoligono(Ponto &pt, Poligono &p) {
+    Ponto limInf, limSup;
+    limInf.imprime();
+    limSup.imprime();
+    p.obtemLimites(&limInf, &limSup);
+    limInf.imprime();
+    limSup.imprime();
+}
+void checkPointPosition(Ponto &p, int x, int y) {
+    if (p.x > Max.x)
+        p.x = Min.x;
+    else if (p.x < Min.x)
+        p.x = Max.x;
+
+    if (p.y > Max.y)
+        p.y = Min.y;
+    else if (p.y < Min.y)
+        p.y = Max.y;
+
+    for (int i = 0; i < Voro.getNPoligonos(); i++) {
+        Poligono poligono = Voro.getPoligono(i);
+        cout << "Vamos pensar\n";
+        if (pontoNoPoligono(p, poligono)) {
+            cout << "ACHEI";
+        }
+    }
+}
+void movePointVertical(Ponto &p, int distance) {
+    p.y += distance;
+    checkPointPosition(p, 0, distance);
+}
+void movePointHorizontal(Ponto &p, int distance) {
+    p.x += distance;
+    checkPointPosition(p, distance, 0);
+}
+void movePoint(char key) {
+    switch (key) {
+        case 'w':
+            movePointVertical(andante, 1);
+            break;
+        case 'a':
+            movePointHorizontal(andante, -1);
+            break;
+        case 's':
+            movePointVertical(andante, -1);
+            break;
+        case 'd':
+            movePointHorizontal(andante, 1);
+            break;
+    }
+}
 // **********************************************************************
 //  void keyboard ( unsigned char key, int x, int y )
 // **********************************************************************
@@ -326,6 +383,12 @@ void keyboard ( unsigned char key, int x, int y )
 		case 27:        // Termina o programa qdo
 			exit ( 0 );   // a tecla ESC for pressionada
 			break;
+        case 'w':
+        case 'a':
+        case 's':
+        case 'd':
+            movePoint(key);
+            break;
         case 't':
             ContaTempo(3);
             break;
@@ -335,6 +398,8 @@ void keyboard ( unsigned char key, int x, int y )
 		default:
 			break;
 	}
+
+	glutPostRedisplay();
 }
 // **********************************************************************
 //  void arrow_keys ( int a_keys, int x, int y )

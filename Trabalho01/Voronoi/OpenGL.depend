@@ -249,3 +249,167 @@
 1694745832 source:c:\users\felip\desktop\log\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\diagramavoronoi.cpp
 	"DiagramaVoronoi.h"
 
+1695156581 source:c:\users\f.freitas007\documents\github\computacao_grafica\trabalho01\voronoi\diagramavoronoi.cpp
+	"DiagramaVoronoi.h"
+
+1695156225 c:\users\f.freitas007\documents\github\computacao_grafica\trabalho01\voronoi\diagramavoronoi.h
+	<iostream>
+	<fstream>
+	"Poligono.h"
+
+1695156225 c:\users\f.freitas007\documents\github\computacao_grafica\trabalho01\voronoi\poligono.h
+	<iostream>
+	<windows.h>
+	<glut.h>
+	<GLUT/glut.h>
+	<glut.h>
+	"Ponto.h"
+	<vector>
+
+1695156225 c:\users\f.freitas007\documents\github\computacao_grafica\trabalho01\voronoi\gl\glut.h
+	"freeglut.h"
+
+1695156225 c:\users\f.freitas007\documents\github\computacao_grafica\trabalho01\voronoi\gl\freeglut.h
+	"freeglut_std.h"
+	"freeglut_ext.h"
+
+1695156225 c:\users\f.freitas007\documents\github\computacao_grafica\trabalho01\voronoi\gl\freeglut_std.h
+	<windows.h>
+	<GL/gl.h>
+	<GL/glu.h>
+
+1695156225 c:\users\f.freitas007\documents\github\computacao_grafica\trabalho01\voronoi\gl\freeglut_ext.h
+
+1695156225 c:\users\f.freitas007\documents\github\computacao_grafica\trabalho01\voronoi\ponto.h
+	<iostream>
+	<cmath>
+
+1695156225 source:c:\users\f.freitas007\documents\github\computacao_grafica\trabalho01\voronoi\exibevariospoligonos.cpp
+	<iostream>
+	<cmath>
+	<ctime>
+	<fstream>
+	<stdlib.h>
+	<windows.h>
+	<glut.h>
+	<sys/time.h>
+	<GLUT/glut.h>
+	<glut.h>
+	"Ponto.h"
+	"Poligono.h"
+	"DiagramaVoronoi.h"
+	"ListaDeCoresRGB.h"
+	"Temporizador.h"
+
+1695156225 c:\users\f.freitas007\documents\github\computacao_grafica\trabalho01\voronoi\listadecoresrgb.h
+	<iostream>
+	<cmath>
+	<ctime>
+	<fstream>
+	<windows.h>
+	<glut.h>
+	<sys/time.h>
+	<GLUT/glut.h>
+	<glut.h>
+
+1695156225 c:\users\f.freitas007\documents\github\computacao_grafica\trabalho01\voronoi\temporizador.h
+	<iostream>
+	<windows.h>
+	<sys/time.h>
+
+1695156225 source:c:\users\f.freitas007\documents\github\computacao_grafica\trabalho01\voronoi\listadecoresrgb.cpp
+	"ListaDeCoresRGB.h"
+
+1695156225 source:c:\users\f.freitas007\documents\github\computacao_grafica\trabalho01\voronoi\poligono.cpp
+	<iostream>
+	<fstream>
+	"Poligono.h"
+
+1695156225 source:c:\users\f.freitas007\documents\github\computacao_grafica\trabalho01\voronoi\ponto.cpp
+	"Ponto.h"
+
+1695156225 source:c:\users\f.freitas007\documents\github\computacao_grafica\trabalho01\voronoi\temporizador.cpp
+	"Temporizador.h"
+
+1695156581 source:c:\users\f.freitas007\downloads\voronoi\diagramavoronoi.cpp
+	"DiagramaVoronoi.h"
+
+1695156225 c:\users\f.freitas007\downloads\voronoi\diagramavoronoi.h
+	<iostream>
+	<fstream>
+	"Poligono.h"
+
+1695156225 c:\users\f.freitas007\downloads\voronoi\poligono.h
+	<iostream>
+	<windows.h>
+	<glut.h>
+	<GLUT/glut.h>
+	<glut.h>
+	"Ponto.h"
+	<vector>
+
+1694724984 c:\users\f.freitas007\downloads\voronoi\gl\glut.h
+	"freeglut.h"
+
+1694724984 c:\users\f.freitas007\downloads\voronoi\gl\freeglut.h
+	"freeglut_std.h"
+	"freeglut_ext.h"
+
+1694724985 c:\users\f.freitas007\downloads\voronoi\gl\freeglut_std.h
+	<windows.h>
+	<GL/gl.h>
+	<GL/glu.h>
+
+1694724984 c:\users\f.freitas007\downloads\voronoi\gl\freeglut_ext.h
+
+1695156225 c:\users\f.freitas007\downloads\voronoi\ponto.h
+	<iostream>
+	<cmath>
+
+1695156225 source:c:\users\f.freitas007\downloads\voronoi\exibevariospoligonos.cpp
+	<iostream>
+	<cmath>
+	<ctime>
+	<fstream>
+	<stdlib.h>
+	<windows.h>
+	<glut.h>
+	<sys/time.h>
+	<GLUT/glut.h>
+	<glut.h>
+	"Ponto.h"
+	"Poligono.h"
+	"DiagramaVoronoi.h"
+	"ListaDeCoresRGB.h"
+	"Temporizador.h"
+
+1695157470 c:\users\f.freitas007\downloads\voronoi\listadecoresrgb.h
+	<iostream>
+	<cmath>
+	<ctime>
+	<fstream>
+	<windows.h>
+	<glut.h>
+	<sys/time.h>
+	<GLUT/glut.h>
+	<glut.h>
+
+1695156225 c:\users\f.freitas007\downloads\voronoi\temporizador.h
+	<iostream>
+	<windows.h>
+	<sys/time.h>
+
+1695157445 source:c:\users\f.freitas007\downloads\voronoi\listadecoresrgb.cpp
+	"ListaDeCoresRGB.h"
+
+1695156225 source:c:\users\f.freitas007\downloads\voronoi\poligono.cpp
+	<iostream>
+	<fstream>
+	"Poligono.h"
+
+1695156225 source:c:\users\f.freitas007\downloads\voronoi\ponto.cpp
+	"Ponto.h"
+
+1695156225 source:c:\users\f.freitas007\downloads\voronoi\temporizador.cpp
+	"Temporizador.h"
+
