@@ -9,33 +9,39 @@
 #include "Ponto.h"
 Ponto::Ponto ()
 {
-    x=y=z=0;
+    x = y = z = 0;
 }
+
 Ponto::Ponto(float x, float y, float z)
 {
     this->x = x;
     this->y = y;
     this->z = z;
 }
+
 void Ponto::set(float x, float y, float z)
 {
     this->x = x;
     this->y = y;
     this->z = z;
 }
+
 void Ponto::imprime() {
-    cout << "(" << x << ", " << y <<")\n" << flush;
+    cout << "(" << x << ", " << y << ", " << z <<")" << flush;
 }
+
 void Ponto::imprime(char const *msg)
 {
     cout << msg;
     imprime();
 }
+
 void Ponto::imprime(char const *msgAntes, char const *msgDepois)
 {
     imprime(msgAntes);
     cout << msgDepois;
 }
+
 void Ponto::multiplica(double x, double y, double z)
 {
     this->x *= x;
@@ -82,9 +88,10 @@ void Ponto::rotacionaX(float angulo)
     y = yr;
     z = zr;
 }
+
 double Ponto::modulo()
 {
-    return sqrt(x*x+y*y+z*z);
+    return sqrt(x*x + y*y + z*z);
 }
 
 void Ponto::versor()
@@ -103,8 +110,10 @@ Ponto ObtemMaximo (Ponto P1, Ponto P2)
     Max.x = (P2.x > P1.x) ? P2.x : P1.x;
     Max.y = (P2.y > P1.y) ? P2.y : P1.y;
     Max.z = (P2.z > P1.z) ? P2.z : P1.z;
+
     return Max;
 }
+
 Ponto ObtemMinimo (Ponto P1, Ponto P2)
 {
     Ponto Min;
@@ -112,16 +121,18 @@ Ponto ObtemMinimo (Ponto P1, Ponto P2)
     Min.x = (P2.x < P1.x) ? P2.x : P1.x;
     Min.y = (P2.y < P1.y) ? P2.y : P1.y;
     Min.z = (P2.z < P1.z) ? P2.z : P1.z;
+
     return Min;
 }
+
 bool operator==(Ponto P1, Ponto P2)
 {
     if (P1.x != P2.x) return false;
     if (P1.y != P2.y) return false;
     if (P1.z != P2.z) return false;
     return true;
-
 }
+
 Ponto operator+(Ponto P1, Ponto P2)
 {
     Ponto temp;
@@ -132,7 +143,7 @@ Ponto operator+(Ponto P1, Ponto P2)
     return temp;
 }
 
-Ponto operator- (Ponto P1, Ponto P2)
+Ponto operator-(Ponto P1, Ponto P2)
 {
     Ponto temp;
     temp = P1;
@@ -141,7 +152,8 @@ Ponto operator- (Ponto P1, Ponto P2)
     temp.z -= P2.z;
     return temp;
 }
-Ponto operator* (Ponto P1, float k)
+
+Ponto operator*(Ponto P1, float k)
 {
     Ponto temp;
     temp.x = P1.x * k;
@@ -154,23 +166,20 @@ Ponto operator-(Ponto P1)
 {
     return P1 * -1;
 }
-// **********************************************************************
-//    Calcula o produto escalar entre os vetores V1 e V2
-// **********************************************************************
+
 double ProdEscalar(Ponto v1, Ponto v2)
 {
     return v1.x*v2.x + v1.y*v2.y+ v1.z*v2.z;
 }
-// **********************************************************************
-//    Calcula o produto vetorial entre os vetores V1 e V2
-// **********************************************************************
+
 void ProdVetorial (Ponto v1, Ponto v2, Ponto &vresult)
 {
     vresult.x = v1.y * v2.z - (v1.z * v2.y);
     vresult.y = v1.z * v2.x - (v1.x * v2.z);
     vresult.z = v1.x * v2.y - (v1.y * v2.x);
 }
-long int ContadorInt=0;
+
+long int ContadorInt = 0;
 /* ********************************************************************** */
 /*                                                                        */
 /*  Calcula a interseccao entre 2 retas (no plano "XY" Z = 0)             */
@@ -198,9 +207,7 @@ int intersec2d(Ponto k, Ponto l, Ponto m, Ponto n, double &s, double &t)
 
     return 1; // há intersecção
 }
-// **********************************************************************
-//
-// **********************************************************************
+
 bool HaInterseccao(Ponto k, Ponto l, Ponto m, Ponto n)
 {
     int ret;
@@ -208,22 +215,17 @@ bool HaInterseccao(Ponto k, Ponto l, Ponto m, Ponto n)
 
     ContadorInt = ContadorInt + 1;
     ret = intersec2d( k,  l,  m,  n, s, t);
-    if (!ret) return false;
-    if (s>=0.0 && s <=1.0 && t>=0.0 && t<=1.0)
-        return true;
-    else return false;
+    if (!ret)
+        return false;
+    return (s>=0.0 && s <=1.0 && t>=0.0 && t<=1.0);
 
 }
-// **********************************************************************
-//
-// **********************************************************************
+
 void resetContadorInt()
 {
     ContadorInt = 0;
 }
-// **********************************************************************
-//
-// **********************************************************************
+
 long int getContadorInt()
 {
     return ContadorInt;

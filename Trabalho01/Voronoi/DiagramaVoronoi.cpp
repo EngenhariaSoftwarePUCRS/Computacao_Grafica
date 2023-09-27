@@ -7,13 +7,15 @@
 //
 
 #include "DiagramaVoronoi.h"
+#include "Envelope.h"
 
-ifstream input;            // ofstream arq;
+ifstream input;
 
 Voronoi::Voronoi()
 {
 
 }
+
 Poligono Voronoi::LeUmPoligono()
 {
     Poligono P;
@@ -51,16 +53,17 @@ void Voronoi::LePoligonos(const char *nome)
     Ponto A, B;
     Diagrama[0] = LeUmPoligono();
     Diagrama[0].obtemLimites(Min, Max);// obtem o envelope do poligono
+    Diagrama[0].envelope = Envelope(Min, Max);
     for (int i=1; i< qtdDePoligonos; i++)
     {
         Diagrama[i] = LeUmPoligono();
         Diagrama[i].obtemLimites(A, B); // obtem o envelope do poligono
+        Diagrama[i].envelope = Envelope(Min, Max);
 
         Min = ObtemMinimo (A, Min);
         Max = ObtemMaximo (B, Max);
     }
     cout << "Lista de Poligonos lida com sucesso!" << endl;
-
 }
 
 Poligono Voronoi::getPoligono(int i)
@@ -72,10 +75,12 @@ Poligono Voronoi::getPoligono(int i)
     }
     return Diagrama[i];
 }
+
 unsigned int Voronoi::getNPoligonos()
 {
     return qtdDePoligonos;
 }
+
 void Voronoi::obtemLimites(Ponto &min, Ponto &max)
 {
     min = this->Min;
@@ -88,14 +93,9 @@ void Voronoi::obtemVizinhosDasArestas()
         Poligono p1 = this->getPoligono(i);
         Poligono p2 = this->getPoligono((i + 1) % this->getNPoligonos());
 
-        cout << "Poligono 1: " << i << endl;
-        cout << "Poligono 2: " << ((i + 1) % this->getNPoligonos()) << endl;
-
         for (int j = 0; j < p1.getNVertices(); j++) {
             Ponto p1a = p1.getVertice(j);
             Ponto p1b = p1.getVertice((j + 1) % p1.getNVertices());
-
-            cout << "Aresta " << j << " de " << i << endl;
 
             for (int k = 0; k < p2.getNVertices(); k++) {
                 Ponto p2a = p2.getVertice(k);
@@ -104,12 +104,6 @@ void Voronoi::obtemVizinhosDasArestas()
                 if (p1a == p2b && p1b == p2a) {
                     p1.insereVizinho(&p2);
                     p2.insereVizinho(&p1);
-
-                    cout << "O poligono " << i << " e vizinho do poligono " << ((i + 1) % p1.getNVertices()) << endl;
-                    cout << "O poligono " << ((i + 1) % p1.getNVertices()) << " e vizinho do poligono " << i << endl;
-
-                    cout << "Aresta " << j << " de " << i << " e vizinha da aresta " << k << " de " << ((i + 1) % p1.getNVertices()) << endl;
-                    cout << "Aresta " << k << " de " << ((i + 1) % p1.getNVertices()) << " e vizinha da aresta " << j << " de " << i << endl;
                 }
             }
         }

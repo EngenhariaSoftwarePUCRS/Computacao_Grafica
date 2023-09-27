@@ -2,39 +2,9 @@
 <CodeBlocks_layout_file>
 	<FileVersion major="1" minor="0" />
 	<ActiveTarget name="Debug-Windows" />
-	<File name="Poligono.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="Ponto.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="2055" topLine="72" />
-		</Cursor>
-	</File>
-	<File name="ListaDeCoresRGB.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="2547" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="Temporizador.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="56" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="ListaDeCoresRGB.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="1946" topLine="106" />
-		</Cursor>
-	</File>
-	<File name="Poligono.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="1045" topLine="33" />
-		</Cursor>
-	</File>
-	<File name="DiagramaVoronoi.cpp" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="1370" topLine="0" />
-		</Cursor>
-	</File>
-	<File name="Temporizador.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="195" topLine="12" />
+			<Cursor1 position="5065" topLine="207" />
 		</Cursor>
 	</File>
 	<File name="Ponto.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -42,14 +12,49 @@
 			<Cursor1 position="0" topLine="31" />
 		</Cursor>
 	</File>
-	<File name="Ponto.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="Temporizador.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="0" topLine="114" />
+			<Cursor1 position="56" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="Temporizador.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="195" topLine="12" />
+		</Cursor>
+	</File>
+	<File name="DiagramaVoronoi.cpp" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1246" topLine="87" />
+		</Cursor>
+	</File>
+	<File name="Envelope.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="0" topLine="66" />
 		</Cursor>
 	</File>
 	<File name="ExibeVARIOSPoligonos.cpp" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="8825" topLine="310" />
+			<Cursor1 position="8700" topLine="309" />
+		</Cursor>
+	</File>
+	<File name="ListaDeCoresRGB.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="2547" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="ListaDeCoresRGB.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1946" topLine="106" />
+		</Cursor>
+	</File>
+	<File name="Poligono.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1188" topLine="25" />
+		</Cursor>
+	</File>
+	<File name="Poligono.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="575" topLine="39" />
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>

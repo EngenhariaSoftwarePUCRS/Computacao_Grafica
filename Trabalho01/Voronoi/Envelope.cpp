@@ -13,10 +13,12 @@ Envelope::Envelope()
 {
     
 }
+
 Envelope::Envelope(Ponto P1, Ponto P2)
 {
     GeraEnvelope(P1,P2);
 }
+
 bool Envelope::temColisao(Envelope E)
 {
     /*
@@ -38,6 +40,7 @@ bool Envelope::temColisao(Envelope E)
         return false;
     return true;
 }
+
 void Envelope::GeraEnvelope(Ponto P1, Ponto P2)
 {
     Min = ObtemMinimo(P1, P2);
@@ -51,6 +54,7 @@ void Envelope::GeraEnvelope(Ponto P1, Ponto P2)
     // Meio.imprime("Meio: ", "\n");
     // MeiaLargura.imprime("Meia Largura: ", "\n");
 }
+
 void Envelope::AtualizaEnvelope()
 {
     Meio = (Max+Min) * 0.5;
@@ -66,11 +70,13 @@ bool Envelope::pontoEstaDentro(Ponto P)
     
     return true;
 }
+
 void Envelope::imprime()
 {
     Min.imprime("Minimo: ");
     Max.imprime(" Maximo: ");
 }
+
 void Envelope::Desenha()
 {
     glBegin(GL_LINE_LOOP);
@@ -80,4 +86,3 @@ void Envelope::Desenha()
         glVertex2d(Max.x, Min.y);
     glEnd();
 }
-

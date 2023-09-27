@@ -254,3 +254,7 @@ $RECYCLE.BIN/
 *.exe
 *.out
 *.app
+
+
+# Allow freeGlut to be included in the project
+!lib/*.a

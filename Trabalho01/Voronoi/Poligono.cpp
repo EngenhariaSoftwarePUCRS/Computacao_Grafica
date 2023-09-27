@@ -13,7 +13,7 @@ using namespace std;
 
 Poligono::Poligono()
 {
-    
+
 }
 
 void Poligono::insereVertice(Ponto p)
@@ -46,14 +46,19 @@ void Poligono::insereVizinho(Poligono *P, int pos)
     Vizinhos.insert(Vizinhos.begin()+pos, P);
 }
 
+Poligono* Poligono::getVizinho(int i)
+{
+    return Vizinhos[i];
+}
+
 Ponto Poligono::getVertice(int i)
 {
     return Vertices[i];
 }
 
-Poligono* Poligono::getVizinho(int i)
+bool Poligono::pontoEstaDentro(Ponto p)
 {
-    return Vizinhos[i];
+    return envelope.pontoEstaDentro(p);
 }
 
 void Poligono::pintaPoligono()
@@ -71,6 +76,7 @@ void Poligono::desenhaPoligono()
         glVertex3f(Vertices[i].x,Vertices[i].y,Vertices[i].z);
     glEnd();
 }
+
 void Poligono::desenhaVertices()
 {
     glBegin(GL_POINTS);
@@ -78,11 +84,13 @@ void Poligono::desenhaVertices()
         glVertex3f(Vertices[i].x,Vertices[i].y,Vertices[i].z);
     glEnd();
 }
+
 void Poligono::imprime()
 {
     for (int i=0; i<Vertices.size(); i++)
         Vertices[i].imprime();
 }
+
 unsigned long Poligono::getNVertices()
 {
     return Vertices.size();
@@ -96,7 +104,7 @@ unsigned long Poligono::getNVizinhos()
 void Poligono::obtemLimites(Ponto &Min, Ponto &Max)
 {
     Max = Min = Vertices[0];
-    
+
     for (int i=0; i<Vertices.size(); i++)
     {
         Min = ObtemMinimo (Vertices[i], Min);
@@ -104,9 +112,6 @@ void Poligono::obtemLimites(Ponto &Min, Ponto &Max)
     }
 }
 
-// **********************************************************************
-//
-// **********************************************************************
 void Poligono::LePoligono(const char *nome)
 {
     ifstream input;            // ofstream arq;
@@ -120,7 +125,7 @@ void Poligono::LePoligono(const char *nome)
     string S;
     //int nLinha = 0;
     unsigned int qtdVertices;
-    
+
     input >> qtdVertices;  // arq << qtdVertices
 
     for (int i=0; i< qtdVertices; i++)

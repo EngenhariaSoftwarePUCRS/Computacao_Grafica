@@ -27,6 +27,7 @@ using namespace std;
 #endif
 
 #include "Ponto.h"
+#include "Envelope.h"
 #include <vector>
 
 class Poligono
@@ -35,6 +36,7 @@ class Poligono
     vector <Poligono *> Vizinhos;
     Ponto Min, Max;
 public:
+    Envelope envelope;
     Poligono();
     Ponto getVertice(int);
     Poligono* getVizinho(int);
@@ -53,6 +55,7 @@ public:
     void LePoligono(const char *nome);
     void desenhaAresta(int n);
     void getAresta(int i, Ponto &P1, Ponto &P2);
+    bool pontoEstaDentro(Ponto p);
 };
 
-#endif 
+#endif
