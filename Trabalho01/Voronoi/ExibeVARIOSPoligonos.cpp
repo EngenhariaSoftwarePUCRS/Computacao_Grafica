@@ -310,14 +310,11 @@ void display( void )
     Esq = andante + Dir * (1000);
     glColor3f(1, 1, 1); // R, G, B  [0..1]
     DesenhaLinha(andante, Esq);
-    glColor3f(0, 1, 0);
-    DesenhaPonto(andante, 3);
 
-    glColor3f(1, 0, 0); // R, G, B  [0..1]
-
+    glColor3f(1, 0, 0);
     DesenhaPonto(andante, 10);
 
-    glColor3f(1, 1, 1);
+    glColor3f(1, 0, 1);
     Ponto P1, P2;
     int nroInterseccoes = 0;
     for (int i = 0; i < Voro.getNPoligonos(); i++)
