@@ -56,6 +56,7 @@ Ponto Min, Max, PontoClicado;
 
 Ponto andante;
 int poligonoAnterior = 0;
+bool estaNoAnterior = false;
 
 bool desenha = false;
 bool FoiClicado = false;
@@ -96,22 +97,16 @@ void ImprimeNroDoPoligono(Poligono P, int n) {
     sprintf(msg,"%d",n);
 
     Ponto Soma, A;
-
-    for (int i=0;i<P.getNVertices();i++)
-
-    {
-
+    for (int i = 0; i < P.getNVertices(); i++) {
         A = P.getVertice(i);
-
         Soma = Soma + A;
-
     }
 
     double div = 1.0/P.getNVertices();
 
     Soma = Soma * div;
 
-    printString(msg,Soma.x, Soma.y);
+    printString(msg, Soma.x, Soma.y);
 }
 // **********************************************************************
 //
@@ -316,10 +311,10 @@ void display( void )
 
     glColor3f(1, 0, 1);
     Ponto P1, P2;
-    int nroInterseccoes = 0;
     for (int i = 0; i < Voro.getNPoligonos(); i++)
     {
         Poligono P = Voro.getPoligono(i);
+        int nroInterseccoes = 0;
         for (int j = 0; j < P.getNVertices(); j++)
         {
             P.getAresta(j, P1, P2);
@@ -328,11 +323,9 @@ void display( void )
                 P.desenhaAresta(j);
             }
         }
+        if (nroInterseccoes % 2 == 1)
+            break;
     }
-    if (nroInterseccoes % 2 == 1)
-        cout << "Ponto dentro do poligono" << endl;
-    else
-        cout << "Ponto fora do poligono" << endl;
 
     glutSwapBuffers();
 }
@@ -359,11 +352,53 @@ void ContaTempo(double tempo)
     }
 }
 
-bool pontoNoPoligono(Ponto &pt, Poligono &p) {
-    return p.pontoEstaDentro(pt);
+int checkPointPosition(Ponto &p) {
+    Ponto Esq;
+    Ponto Dir(-1, 0);
+    Esq = andante + Dir * (1000);
+    glColor3f(1, 1, 1); // R, G, B  [0..1]
+    DesenhaLinha(andante, Esq);
+
+    glColor3f(1, 0, 0);
+    DesenhaPonto(andante, 10);
+
+    glColor3f(1, 0, 1);
+    Ponto P1, P2;
+    int qtdChamadasProdutoVetorial = 0;
+    cout << "\n\n===============================" << endl;
+    cout << "Pol anterior " << poligonoAnterior << endl;
+    for (int i = 0; i < Voro.getNPoligonos(); i++)
+    {
+        Poligono P = Voro.getPoligono(i);
+        int nroInterseccoes = 0;
+        for (int j = 0; j < P.getNVertices(); j++)
+        {
+            P.getAresta(j, P1, P2);
+            qtdChamadasProdutoVetorial++;
+            if (HaInterseccao(andante, Esq, P1, P2)) {
+                nroInterseccoes++;
+                P.desenhaAresta(j);
+            }
+        }
+        if (nroInterseccoes > 0) {
+            cout << "\nAnalisando novo poligono" << endl;
+            cout << "Nro int com o poligono " << i << " = " << nroInterseccoes << endl;
+            if (nroInterseccoes % 2 == 1) {
+                cout << "Ponto dentro do poligono" << endl;
+                poligonoAnterior = i;
+                break;
+            } else
+                cout << "Ponto fora do poligono" << endl;
+        }
+    }
+
+    cout << "Pol anterior " << poligonoAnterior << endl;
+    glutPostRedisplay();
+
+    return qtdChamadasProdutoVetorial;
 }
 
-void checkPointPosition(Ponto &p, float x, float y) {
+void checkPointInBounds(Ponto &p) {
     if (p.x > Max.x)
         p.x = Min.x;
     else if (p.x < Min.x)
@@ -373,18 +408,14 @@ void checkPointPosition(Ponto &p, float x, float y) {
         p.y = Min.y;
     else if (p.y < Min.y)
         p.y = Max.y;
-
-    glutPostRedisplay();
 }
 
 void movePointVertical(Ponto &p, float distance) {
     p.y += distance;
-    checkPointPosition(p, 0, distance);
 }
 
 void movePointHorizontal(Ponto &p, float distance) {
     p.x += distance;
-    checkPointPosition(p, distance, 0);
 }
 
 void movePoint(char key) {
@@ -402,6 +433,14 @@ void movePoint(char key) {
             movePointHorizontal(andante, 0.3);
             break;
     }
+    checkPointInBounds(andante);
+    int pAnterior = poligonoAnterior;
+    checkPointPosition(andante);
+    if (pAnterior == poligonoAnterior) {
+        cout << "Sigo no mesmo poligono" << endl;
+        return;
+    }
+    cout << "Segui a vida, livre" << endl;
 }
 // **********************************************************************
 //  void keyboard ( unsigned char key, int x, int y )

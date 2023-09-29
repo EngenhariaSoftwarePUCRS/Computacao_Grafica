@@ -58,6 +58,7 @@ Ponto Poligono::getVertice(int i)
 
 bool Poligono::pontoEstaDentro(Ponto p)
 {
+    p.imprime("Ponto está dentro?");
     return envelope.pontoEstaDentro(p);
 }
 

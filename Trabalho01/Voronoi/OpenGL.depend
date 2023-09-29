@@ -167,7 +167,7 @@
 1694724984 source:c:\users\f.freitas007\downloads\voronoi\voronoi\temporizador.cpp
 	"Temporizador.h"
 
-1695335056 source:c:\users\felip\desktop\log\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\exibevariospoligonos.cpp
+1695935917 source:c:\users\felip\desktop\log\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\exibevariospoligonos.cpp
 	<iostream>
 	<cmath>
 	<ctime>
@@ -236,7 +236,7 @@
 1695325606 source:c:\users\felip\desktop\log\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\listadecoresrgb.cpp
 	"ListaDeCoresRGB.h"
 
-1695780240 source:c:\users\felip\desktop\log\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\poligono.cpp
+1695936134 source:c:\users\felip\desktop\log\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\poligono.cpp
 	<iostream>
 	<fstream>
 	"Poligono.h"
