@@ -46,8 +46,7 @@ void Voronoi::LePoligonos(const char *nome)
     input.open(nome, ios::in); //arq.open(nome, ios::out);
     if (!input)
     {
-        if (debug)
-            cout << "Erro ao abrir " << nome << ". " << endl;
+        cout << "Erro ao abrir " << nome << ". " << endl;
         exit(0);
     }
     string S;
@@ -57,16 +56,16 @@ void Voronoi::LePoligonos(const char *nome)
         cout << "qtdDePoligonos:" << qtdDePoligonos << endl;
     Ponto A, B;
     Diagrama[0] = LeUmPoligono();
-    Diagrama[0].obtemLimites(Min, Max);// obtem o envelope do poligono
-    Diagrama[0].envelope = Envelope(Min, Max);
-    for (int i=1; i< qtdDePoligonos; i++)
+    Diagrama[0].obtemLimites(Min, Max); // obtem o envelope do poligono
+    Diagrama[0].envelopa(Min, Max);
+    for (int i = 1; i < qtdDePoligonos; i++)
     {
         Diagrama[i] = LeUmPoligono();
         Diagrama[i].obtemLimites(A, B); // obtem o envelope do poligono
-        Diagrama[i].envelope = Envelope(Min, Max);
+        Diagrama[i].envelopa(Min, Max);
 
-        Min = ObtemMinimo (A, Min);
-        Max = ObtemMaximo (B, Max);
+        Min = ObtemMinimo(A, Min);
+        Max = ObtemMaximo(B, Max);
     }
     if (debug)
         cout << "Lista de Poligonos lida com sucesso!" << endl;

@@ -32,7 +32,7 @@ class Envelope
 {
     Ponto Meio, MeiaLargura;
 public:
-    Ponto Min,Max; // envelope
+    Ponto Min, Max;
     
     Envelope();
     Envelope(Ponto P1, Ponto P2);
@@ -42,7 +42,6 @@ public:
     bool pontoEstaDentro(Ponto P);
     void imprime();
     void Desenha();
-    
 };
 
 #endif /* Envelope_hpp */

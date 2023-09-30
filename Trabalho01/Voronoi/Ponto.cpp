@@ -27,7 +27,8 @@ void Ponto::set(float x, float y, float z)
 }
 
 void Ponto::imprime() {
-    cout << "(" << x << ", " << y << ", " << z <<")" << flush;
+    cout << "(" << x << ", " << y << ") " << flush;
+    // cout << "(" << x << ", " << y << ", " << z <<")" << flush;
 }
 
 void Ponto::imprime(char const *msg)
@@ -42,14 +43,14 @@ void Ponto::imprime(char const *msgAntes, char const *msgDepois)
     cout << msgDepois;
 }
 
-void Ponto::multiplica(double x, double y, double z)
+void Ponto::multiplica(double x, double y, double z = 0)
 {
     this->x *= x;
     this->y *= y;
     this->z *= z;
 }
 
-void Ponto::soma(double x, double y, double z)
+void Ponto::soma(double x, double y, double z = 0)
 {
     this->x += x;
     this->y += y;
@@ -59,13 +60,13 @@ void Ponto::soma(double x, double y, double z)
 void Ponto::rotacionaZ(float angulo)
 {
     float xr, yr;
-    //cout << "Angulo: " << angulo << " ";
+    // cout << "Angulo: " << angulo << " ";
     double anguloRad = angulo * 3.14159265359/180.0;
     xr = x*cos(anguloRad) - y*sin(anguloRad);
     yr = x*sin(anguloRad) + y*cos(anguloRad);
     x = xr;
     y = yr;
-    //imprime();
+    // imprime();
 }
 
 
@@ -102,7 +103,6 @@ void Ponto::versor()
     z /= m;
 }
 
-
 Ponto ObtemMaximo (Ponto P1, Ponto P2)
 {
     Ponto Max;
@@ -135,30 +135,34 @@ bool operator==(Ponto P1, Ponto P2)
 
 Ponto operator+(Ponto P1, Ponto P2)
 {
-    Ponto temp;
-    temp = P1;
+    Ponto temp = P1;
+
     temp.x += P2.x;
     temp.y += P2.y;
     temp.z += P2.z;
+
     return temp;
 }
 
 Ponto operator-(Ponto P1, Ponto P2)
 {
-    Ponto temp;
-    temp = P1;
+    Ponto temp = P1;
+
     temp.x -= P2.x;
     temp.y -= P2.y;
     temp.z -= P2.z;
+
     return temp;
 }
 
 Ponto operator*(Ponto P1, float k)
 {
     Ponto temp;
+
     temp.x = P1.x * k;
     temp.y = P1.y * k;
     temp.z = P1.z * k;
+
     return temp;
 }
 
@@ -202,8 +206,8 @@ int intersec2d(Ponto k, Ponto l, Ponto m, Ponto n, double &s, double &t)
     if (det == 0.0)
         return 0 ; // não há intersecção
 
-    s = ((n.x - m.x) * (m.y - k.y) - (n.y - m.y) * (m.x - k.x))/ det ;
-    t = ((l.x - k.x) * (m.y - k.y) - (l.y - k.y) * (m.x - k.x))/ det ;
+    s = ((n.x - m.x) * (m.y - k.y) - (n.y - m.y) * (m.x - k.x)) / det;
+    t = ((l.x - k.x) * (m.y - k.y) - (l.y - k.y) * (m.x - k.x)) / det;
 
     return 1; // há intersecção
 }
@@ -211,14 +215,14 @@ int intersec2d(Ponto k, Ponto l, Ponto m, Ponto n, double &s, double &t)
 bool HaInterseccao(Ponto k, Ponto l, Ponto m, Ponto n)
 {
     int ret;
-    double s,t;
+    double s, t;
 
     ContadorInt = ContadorInt + 1;
-    ret = intersec2d( k,  l,  m,  n, s, t);
+    ret = intersec2d(k, l, m, n, s, t);
     if (!ret)
         return false;
-    return (s>=0.0 && s <=1.0 && t>=0.0 && t<=1.0);
 
+    return (s >= 0.0 && s <= 1.0 && t >= 0.0 && t <= 1.0);
 }
 
 void resetContadorInt()

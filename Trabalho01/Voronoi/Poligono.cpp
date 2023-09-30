@@ -17,8 +17,7 @@ Poligono::Poligono()
     debug = false;
 }
 
-void Poligono::envelopa() {
-    Ponto Min, Max;
+void Poligono::envelopa(Ponto &Min, Ponto &Max) {
     envelope = Envelope(Min, Max);
 }
 
@@ -72,30 +71,30 @@ bool Poligono::pontoEstaDentro(Ponto p)
 void Poligono::pintaPoligono()
 {
     glBegin(GL_POLYGON);
-    for (int i=0; i<Vertices.size(); i++)
-        glVertex3f(Vertices[i].x,Vertices[i].y,Vertices[i].z);
+    for (int i = 0; i < Vertices.size(); i++)
+        glVertex3f(Vertices[i].x, Vertices[i].y, Vertices[i].z);
     glEnd();
 }
 
 void Poligono::desenhaPoligono()
 {
     glBegin(GL_LINE_LOOP);
-    for (int i=0; i<Vertices.size(); i++)
-        glVertex3f(Vertices[i].x,Vertices[i].y,Vertices[i].z);
+    for (int i = 0; i < Vertices.size(); i++)
+        glVertex3f(Vertices[i].x, Vertices[i].y, Vertices[i].z);
     glEnd();
 }
 
 void Poligono::desenhaVertices()
 {
     glBegin(GL_POINTS);
-    for (int i=0; i<Vertices.size(); i++)
-        glVertex3f(Vertices[i].x,Vertices[i].y,Vertices[i].z);
+    for (int i = 0; i < Vertices.size(); i++)
+        glVertex3f(Vertices[i].x, Vertices[i].y, Vertices[i].z);
     glEnd();
 }
 
 void Poligono::imprime()
 {
-    for (int i=0; i<Vertices.size(); i++)
+    for (int i = 0; i < Vertices.size(); i++)
         Vertices[i].imprime();
 }
 
@@ -113,10 +112,10 @@ void Poligono::obtemLimites(Ponto &Min, Ponto &Max)
 {
     Max = Min = Vertices[0];
 
-    for (int i=0; i<Vertices.size(); i++)
+    for (int i = 0; i < Vertices.size(); i++)
     {
-        Min = ObtemMinimo (Vertices[i], Min);
-        Max = ObtemMaximo (Vertices[i], Max);
+        Min = ObtemMinimo(Vertices[i], Min);
+        Max = ObtemMaximo(Vertices[i], Max);
     }
 }
 
@@ -133,20 +132,20 @@ void Poligono::LePoligono(const char *nome)
     if (debug)
         cout << "Lendo arquivo " << nome << "...";
     string S;
-    //int nLinha = 0;
+    // int nLinha = 0;
     unsigned int qtdVertices;
 
     input >> qtdVertices;  // arq << qtdVertices
 
-    for (int i=0; i< qtdVertices; i++)
+    for (int i = 0; i < qtdVertices; i++)
     {
-        double x,y;
+        double x, y;
         // Le cada elemento da linha
         input >> x >> y; // arq << x  << " " << y << endl
         if(!input)
             break;
         //nLinha++;
-        insereVertice(Ponto(x,y));
+        insereVertice(Ponto(x, y));
     }
     if (debug)
         cout << "Poligono lido com sucesso!" << endl;
@@ -163,8 +162,13 @@ void Poligono::getAresta(int n, Ponto &P1, Ponto &P2)
 void Poligono::desenhaAresta(int n)
 {
     glBegin(GL_LINES);
-        glVertex3f(Vertices[n].x,Vertices[n].y,Vertices[n].z);
+        glVertex3f(Vertices[n].x, Vertices[n].y, Vertices[n].z);
         int n1 = (n+1) % Vertices.size();
-        glVertex3f(Vertices[n1].x,Vertices[n1].y,Vertices[n1].z);
+        glVertex3f(Vertices[n1].x, Vertices[n1].y, Vertices[n1].z);
     glEnd();
+}
+
+void Poligono::desenhaEnvelope()
+{
+    envelope.Desenha();
 }

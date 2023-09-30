@@ -21,17 +21,9 @@ Envelope::Envelope(Ponto P1, Ponto P2)
 
 bool Envelope::temColisao(Envelope E)
 {
-    /*
-    cout << "Campo de Visao: ";
-    imprime();
-    cout << endl;
-    cout << "Env 2: ";
-    E.imprime();
-    cout << endl;
-     */
     float distancia;
     distancia = fabs(Meio.x - E.Meio.x);
-   // cout << "distancia X: " << distancia << endl;
+    // cout << "distancia X: " << distancia << endl;
     if (distancia > (MeiaLargura.x + E.MeiaLargura.x))
         return false;
     distancia = fabs(Meio.y - E.Meio.y);
@@ -46,19 +38,14 @@ void Envelope::GeraEnvelope(Ponto P1, Ponto P2)
     Min = ObtemMinimo(P1, P2);
     Max = ObtemMaximo(P1, P2);
 
-    Meio = (Max+Min) * 0.5;
-    MeiaLargura = (Max-Min) * 0.5;
-    
-    // Min.imprime("Minimo: ", "\n");
-    // Max.imprime("Maximo: ", "\n");
-    // Meio.imprime("Meio: ", "\n");
-    // MeiaLargura.imprime("Meia Largura: ", "\n");
+    Meio = (Max + Min) * 0.5;
+    MeiaLargura = (Max - Min) * 0.5;
 }
 
 void Envelope::AtualizaEnvelope()
 {
-    Meio = (Max+Min) * 0.5;
-    MeiaLargura = (Max-Min) * 0.5;
+    Meio = (Max + Min) * 0.5;
+    MeiaLargura = (Max - Min) * 0.5;
 }
 
 bool Envelope::pontoEstaDentro(Ponto P)

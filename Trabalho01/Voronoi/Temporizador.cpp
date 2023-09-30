@@ -16,9 +16,7 @@ Temporizador::Temporizador()
 #else
     // Figure out time elapsed since last call to idle function
     gettimeofday(&start_time, NULL);
-    
 #endif
-
 }
 // Retorna o tempo decorrido desde a última chamada desta mesma função
 double Temporizador::getDeltaT()

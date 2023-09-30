@@ -35,11 +35,11 @@ class Poligono
     vector <Ponto> Vertices;
     vector <Poligono> Vizinhos;
     Ponto Min, Max;
+    Envelope envelope;
     bool debug;
 public:
-    Envelope envelope;
     Poligono();
-    void envelopa();
+    void envelopa(Ponto &Min, Ponto &Max);
     Ponto getVertice(int);
     Poligono getVizinho(int);
     unsigned long getNVertices();
@@ -57,6 +57,7 @@ public:
     void LePoligono(const char *nome);
     void desenhaAresta(int n);
     void getAresta(int i, Ponto &P1, Ponto &P2);
+    void desenhaEnvelope();
     bool pontoEstaDentro(Ponto p);
 };
 
