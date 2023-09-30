@@ -177,3 +177,12 @@ Envelope Poligono::getEnvelope()
 {
     return envelope;
 }
+
+bool operator==(Poligono P1, Poligono P2) {
+    if (!(P1.getNVertices() == P2.getNVertices()))
+        return false;
+    for (int i = 0; i < P1.getNVertices(); i++)
+        if (!(P1.getVertice(i) == P2.getVertice(i)))
+            return false;
+    return true;
+}

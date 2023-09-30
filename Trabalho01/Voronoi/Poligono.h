@@ -62,4 +62,6 @@ public:
     bool pontoEstaDentro(Ponto p);
 };
 
+bool operator==(Poligono P1, Poligono P2);
+
 #endif

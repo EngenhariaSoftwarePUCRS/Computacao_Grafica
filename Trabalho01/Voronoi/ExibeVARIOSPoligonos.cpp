@@ -71,8 +71,11 @@ int poligonoAnterior = 0;
 bool debug = true;
 // IncluiPontosPoligonosConcavos = desenha a linha ate o ponto quando o metodo de inclusao de pontos em poligonos côncavos e chamado
 bool incluiPontosPoligonosConcavos;
+// IncluiPontosPoligonosConvexos = pinta a aresta que foi cruzada quando o metodo de inclusao de pontos em poligonos convexos e chamado
+bool incluiPontosPoligonosConvexos;
 int PassoInicial(Ponto &p, bool &estaNoPoligonoAnterior);
 int InclusaoPontosPoligonosConcavos(Ponto &p, int &poligonoPosMovimento, bool debug);
+int InclusaoPontosPoligonosConvexos(Ponto &p, int &poligonoPosMovimento, Poligono &P, int &arestaCruzada, bool debug);
 
 // **********************************************************************
 //
@@ -170,6 +173,11 @@ void init()
 
     cout << "[SYS]" << " Analizando informacoes de vizinhanca..." << endl;
     Voro.obtemVizinhosDasArestas();
+    for (int i = 0; i < Voro.getNPoligonos(); i++) {
+        Poligono P = Voro.getPoligono(i);
+        if (debug)
+            cout << "\tPoligono " << i << " tem " << P.getNVizinhos() << " vizinhos." << endl;
+    }
     cout << "[SYS]" << " Informacoes de vizinhanca analizadas!" << endl;
 
     cout << "[SYS]" << " Gerando cores dos poligonos..." << endl;
@@ -186,7 +194,7 @@ void init()
     cout << "[SYS]" << " Ponto criado!" << endl;
 
     cout << "[SYS]" << " Computando posicao inicial do ponto..." << endl;
-    bool inside;
+    bool inside = false;
     int qtdChamadasProdutoVetorial = 0;
     for (int i = 0; i < Voro.getNPoligonos(); i++) {
         poligonoAnterior = i;
@@ -345,6 +353,16 @@ void display(void)
             cout << "[SYS]" << " Desenhando linha ate o ponto..." << endl;
         InclusaoPontosPoligonosConcavos(andante, poligonoPosMovimento, false);
         incluiPontosPoligonosConcavos = false;
+    }
+
+    // Pinta a aresta que foi cruzada quando o metodo de inclusao de pontos em poligonos convexos e chamado
+    if (incluiPontosPoligonosConvexos) {
+        int poligonoPosMovimento, arestaCruzada;
+        Poligono P = Voro.getPoligono(poligonoAnterior);
+        if (debug)
+            cout << "[SYS]" << " Pintando aresta que foi cruzada..." << endl;
+        InclusaoPontosPoligonosConvexos(andante, poligonoPosMovimento, P, arestaCruzada, false);
+        incluiPontosPoligonosConvexos = false;
     }
 
     glutSwapBuffers();
@@ -511,6 +529,9 @@ int InclusaoPontosPoligonosConcavos(Ponto &p, int &poligonoPosMovimento, bool de
                     cout << "\tAresta " << j << " do poligono " << i << " cruza a linha horizontal!" << endl;
                 nroInterseccoes++;
                 P.desenhaAresta(j);
+            } else {
+                if (debug)
+                    cout << "\tAresta " << j << " do poligono " << i << " nao cruza a linha horizontal!" << endl;
             }
         }
         if (nroInterseccoes % 2 == 1) {
@@ -594,7 +615,7 @@ Inclusao de pontos em polígonos convexos utilizando a informacao de vizinhanca 
 
 @return quantas vezes a funcao ProdVetorial foi chamada.
 */
-int InclusaoPontosPoligonosConvexos(Ponto &p, int &poligonoPosMovimento, Poligono &P, int &arestaCruzada) {
+int InclusaoPontosPoligonosConvexos(Ponto &p, int &poligonoPosMovimento, Poligono &P, int &arestaCruzada, bool debug = true) {
     // if (debug)
     //     cout << "[SYS]" << " Fazendo teste de inclusao de pontos em poligonos convexos utilizando a informacao de vizinhanca..." << endl;
 
@@ -607,27 +628,21 @@ int InclusaoPontosPoligonosConvexos(Ponto &p, int &poligonoPosMovimento, Poligon
         cout << "\tQtd de vizinhos encontrados: " << P.getNVizinhos() << endl;
     for (int i = 0; i < P.getNVizinhos(); i++) {
         if (debug)
-            cout << "\tComparando com vizinho " << i << endl;
-        if (i == poligonoAnterior) {
-            if (debug)
-                cout << "\tJa sei que nao estou no mesmo poligono que estava antes do ultimo movimento, entao nao preciso testar o poligono " << i << endl;
-            continue;
-        }
+            cout << "\tComparando com " << i + 1 << "o vizinho" << endl;
 
         Vizinho = P.getVizinho(i);
-        if (!Vizinho.pontoEstaDentro(p)) {
-            if (debug)
-                cout << "\tPonto nao esta dentro do envelope do poligono " << i << ", entao nao preciso testar o poligono " << i << endl;
-            continue;
-        }
+        // if (!Vizinho.pontoEstaDentro(p)) {
+        //     if (debug)
+        //         cout << "\tPonto nao esta dentro do envelope do poligono " << i << ", entao nao preciso testar o poligono " << i << endl;
+        //     continue;
+        // }
 
         left = right = false;
 
         for (int j = 0; j < Vizinho.getNVertices(); j++) {
             if (debug)
-                cout << "\tTestando aresta " << j << " do poligono " << i << endl;
+                cout << "\t\tTestando aresta " << j << " do vizinho " << i + 1 << endl;
             Vizinho.getAresta(j, pA, pB);
-            arestaCruzada = j;
             Ponto direcao = pB - pA;
             Ponto pontoAoVerticeInicial = pA - p;
 
@@ -636,21 +651,36 @@ int InclusaoPontosPoligonosConvexos(Ponto &p, int &poligonoPosMovimento, Poligon
             ProdVetorial(direcao, pontoAoVerticeInicial, CrossProduct);
 
             float produtoVetorial = CrossProduct.z;
-            if (produtoVetorial > 0) {
+            if (produtoVetorial == 0) {
                 if (debug)
-                    cout << "\tPonto esta a direita da aresta " << j << " do poligono " << i << endl;
+                    cout << "\t\tPonto esta na aresta " << j << " do vizinho " << i + 1 << endl;
+                continue;
+            } else if (produtoVetorial > 0) {
+                if (debug)
+                    cout << "\t\tPonto esta a direita da aresta " << j << " do vizinho " << i + 1 << endl;
                 right = true;
             } else if (produtoVetorial < 0) {
                 if (debug)
-                    cout << "\tPonto esta a esquerda da aresta " << j << " do poligono " << i << endl;
+                    cout << "\t\tPonto esta a esquerda da aresta " << j << " do vizinho " << i + 1 << endl;
                 left = true;
             }
         }
         // Se, para todos os lados do polígono, o sinal do produto vetorial for consistente (ou seja, todos positivos ou todos negativos), o ponto esta dentro do polígono, e você define inside como verdadeiro.
         if (right != left) {
             if (debug)
-                cout << "\tSinal do produto vetorial consistente, entao o ponto esta dentro do poligono " << i << endl;
+                cout << "\t\tSinal do produto vetorial consistente, entao o ponto esta dentro do vizinho " << i + 1 << endl;
+            arestaCruzada = i;
+            break;
+        }
+    }
+    
+    Poligono PoligonoVizinho;
+    for (int i = 0; i < Voro.getNPoligonos(); i++) {
+        PoligonoVizinho = Voro.getPoligono(i);
+        if (Vizinho == PoligonoVizinho) {
             poligonoPosMovimento = i;
+            if (debug)
+                cout << "\tO ponto foi para o poligono " << i << ", que e o " << i + 1 << "o vizinho" << endl;
             break;
         }
     }
@@ -660,7 +690,7 @@ int InclusaoPontosPoligonosConvexos(Ponto &p, int &poligonoPosMovimento, Poligon
 
 void movePointVertical(Ponto &p, float distance) {
     if (debug)
-        cout << "[SYS]" << " Movendo ponto verticalmente " << distance << " unidades..." << endl; 
+        cout << "[SYS]" << " Movendo ponto verticalmente " << distance << " unidades..." << endl;
     p.y += distance;
 }
 
@@ -760,12 +790,14 @@ void movePoint(char key) {
 
     // Passo 3: Inclusao de pontos em poligonos convexos utilizando a informacao de vizinhanca
     cout << "[SYS] " << "Fazendo teste de inclusao de pontos em poligonos convexos utilizando a informacao de vizinhanca..." << endl;
-    Poligono P = Voro.getPoligono(poligonoPosMovimento);
+    Poligono P = Voro.getPoligono(poligonoAnterior);
     int arestaCruzada;
     qtdChamadasProdutoVetorial = InclusaoPontosPoligonosConvexos(andante, poligonoPosMovimento, P, arestaCruzada);
     cout << "\tChamadas Produto Vetorial (InclusaoPontosPoligonosConvexos): " << qtdChamadasProdutoVetorial << endl;
     cout << "\tAresta cruzada: " << arestaCruzada << endl;
     cout << "[SYS] " << "Continuando..." << endl;
+
+    poligonoAnterior = poligonoPosMovimento;
 
     cout << "=====================================================================================================" << endl;
 }

@@ -56,8 +56,8 @@ void Voronoi::LePoligonos(const char *nome)
         cout << "qtdDePoligonos:" << qtdDePoligonos << endl;
     Ponto A, B;
     Diagrama[0] = LeUmPoligono();
-    Diagrama[0].obtemLimites(Min, Max); // obtem o envelope do poligono
-    Diagrama[0].envelopa(Min, Max);
+    Diagrama[0].obtemLimites(A, B); // obtem o envelope do poligono
+    Diagrama[0].envelopa(A, B);
     for (int i = 1; i < qtdDePoligonos; i++)
     {
         Diagrama[i] = LeUmPoligono();
@@ -95,24 +95,23 @@ void Voronoi::obtemLimites(Ponto &min, Ponto &max)
 
 void Voronoi::obtemVizinhosDasArestas()
 {
-    Poligono P1, P2;
+    Poligono *P1, *P2;
     Envelope e1, e2;
     for (int i = 0; i < qtdDePoligonos; i++)
     {
-        P1 = getPoligono(i);
-        P1.desenhaEnvelope();
-        e1 = P1.getEnvelope();
+        P1 = &Diagrama[i];
+        e1 = P1->getEnvelope();
         for (int j = 0; j < qtdDePoligonos; j++)
         {
-            P2 = getPoligono(j);
             if (i == j)
                 continue;
-            P2.desenhaEnvelope();
-            e2 = P2.getEnvelope();
+            P2 = &Diagrama[j];
+            e2 = P2->getEnvelope();
             if (e1.temColisao(e2))
             {
-                cout << "Poligono " << i << " tem vizinho " << j << endl;
-                P1.insereVizinho(P2);
+                if (debug)
+                    cout << "Poligono " << i << " tem vizinho " << j << endl;
+                P1->insereVizinho(*P2);
             }
         }
     }
