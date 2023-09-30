@@ -112,7 +112,7 @@ void Voronoi::obtemVizinhosDasArestas()
             if (e1.temColisao(e2))
             {
                 cout << "Poligono " << i << " tem vizinho " << j << endl;
-                P1.insereVizinho(&P2);
+                P1.insereVizinho(P2);
             }
         }
     }

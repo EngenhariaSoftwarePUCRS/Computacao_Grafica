@@ -430,12 +430,12 @@
 	"DiagramaVoronoi.h"
 	"Envelope.h"
 
-1696045220 d:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\diagramavoronoi.h
+1696102067 d:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\diagramavoronoi.h
 	<iostream>
 	<fstream>
 	"Poligono.h"
 
-1696096824 d:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\poligono.h
+1696102049 d:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\poligono.h
 	<iostream>
 	<windows.h>
 	<glut.h>
@@ -471,10 +471,10 @@
 	<glut.h>
 	"Ponto.h"
 
-1696092472 source:d:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\envelope.cpp
+1696100158 source:d:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\envelope.cpp
 	"Envelope.h"
 
-1696097732 source:d:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\exibevariospoligonos.cpp
+1696102067 source:d:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\exibevariospoligonos.cpp
 	<iostream>
 	<cmath>
 	<ctime>
@@ -510,7 +510,7 @@
 1696061622 source:d:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\listadecoresrgb.cpp
 	"ListaDeCoresRGB.h"
 
-1696096836 source:d:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\poligono.cpp
+1696102035 source:d:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\poligono.cpp
 	<iostream>
 	<fstream>
 	"Poligono.h"
