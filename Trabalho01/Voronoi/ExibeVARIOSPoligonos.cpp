@@ -68,7 +68,7 @@ float tamanhoAndante, passoAndante;
 // Variavel que guarda o polígono que o ponto estava antes do último movimento
 int poligonoAnterior = 0;
 // Debug = imprime mais informacoes na tela
-bool debug = true;
+bool debug = false;
 // IncluiPontosPoligonosConcavos = desenha a linha ate o ponto quando o metodo de inclusao de pontos em poligonos côncavos e chamado
 bool incluiPontosPoligonosConcavos;
 int PassoInicial(Ponto &p, bool &estaNoPoligonoAnterior);
@@ -655,12 +655,12 @@ int InclusaoPontosPoligonosConvexos(Ponto &p, int &poligonoPosMovimento, Poligon
         // Se, para todos os lados do polígono, o sinal do produto vetorial for consistente (ou seja, todos positivos ou todos negativos), o ponto esta dentro do polígono, e você define inside como verdadeiro.
         if (right != left) {
             if (debug)
-                cout << "\t\tSinal do produto vetorial consistente, entao o ponto esta dentro do vizinho " << i + 1 << endl;
+                cout << "\tSinal do produto vetorial consistente, entao o ponto esta dentro do vizinho " << i + 1 << endl;
             arestaCruzada = i;
             break;
         } else {
             if (debug)
-                cout << "\t\tSinal do produto vetorial inconsistente, entao o ponto nao esta dentro do vizinho " << i + 1 << endl;
+                cout << "\tSinal do produto vetorial inconsistente, entao o ponto nao esta dentro do vizinho " << i + 1 << endl;
         }
     }
 
