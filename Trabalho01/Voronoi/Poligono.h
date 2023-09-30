@@ -39,7 +39,7 @@ class Poligono
     bool debug;
 public:
     Poligono();
-    void envelopa(Ponto &Min, Ponto &Max);
+    void envelopa(Ponto Min, Ponto Max);
     Ponto getVertice(int);
     Poligono getVizinho(int);
     unsigned long getNVertices();
@@ -58,6 +58,7 @@ public:
     void desenhaAresta(int n);
     void getAresta(int i, Ponto &P1, Ponto &P2);
     void desenhaEnvelope();
+    Envelope getEnvelope();
     bool pontoEstaDentro(Ponto p);
 };
 

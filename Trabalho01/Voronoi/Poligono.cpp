@@ -17,7 +17,7 @@ Poligono::Poligono()
     debug = false;
 }
 
-void Poligono::envelopa(Ponto &Min, Ponto &Max) {
+void Poligono::envelopa(Ponto Min, Ponto Max) {
     envelope = Envelope(Min, Max);
 }
 
@@ -171,4 +171,9 @@ void Poligono::desenhaAresta(int n)
 void Poligono::desenhaEnvelope()
 {
     envelope.Desenha();
+}
+
+Envelope Poligono::getEnvelope()
+{
+    return envelope;
 }
