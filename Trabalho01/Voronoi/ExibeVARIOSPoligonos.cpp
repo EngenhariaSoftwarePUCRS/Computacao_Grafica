@@ -71,11 +71,8 @@ int poligonoAnterior = 0;
 bool debug = true;
 // IncluiPontosPoligonosConcavos = desenha a linha ate o ponto quando o metodo de inclusao de pontos em poligonos côncavos e chamado
 bool incluiPontosPoligonosConcavos;
-// IncluiPontosPoligonosConvexos = pinta a aresta que foi cruzada quando o metodo de inclusao de pontos em poligonos convexos e chamado
-bool incluiPontosPoligonosConvexos;
 int PassoInicial(Ponto &p, bool &estaNoPoligonoAnterior);
 int InclusaoPontosPoligonosConcavos(Ponto &p, int &poligonoPosMovimento, bool debug);
-int InclusaoPontosPoligonosConvexos(Ponto &p, int &poligonoPosMovimento, Poligono &P, int &arestaCruzada, bool debug);
 
 // **********************************************************************
 //
@@ -230,11 +227,11 @@ void animate()
     }
     if (TempoTotal > 50.0)
     {
-        if (debug) {
-            cout << "Tempo Acumulado: "  << TempoTotal << " segundos. " ;
-            cout << "Nros de Frames sem desenho: " << nFrames << endl;
-            cout << "FPS(sem desenho): " << nFrames/TempoTotal << endl;
-        }
+        // if (debug) {
+            // cout << "Tempo Acumulado: "  << TempoTotal << " segundos. " ;
+            // cout << "Nros de Frames sem desenho: " << nFrames << endl;
+            // cout << "FPS(sem desenho): " << nFrames/TempoTotal << endl;
+        // }
         TempoTotal = 0;
         nFrames = 0;
     }
@@ -355,16 +352,6 @@ void display(void)
         incluiPontosPoligonosConcavos = false;
     }
 
-    // Pinta a aresta que foi cruzada quando o metodo de inclusao de pontos em poligonos convexos e chamado
-    if (incluiPontosPoligonosConvexos) {
-        int poligonoPosMovimento, arestaCruzada;
-        Poligono P = Voro.getPoligono(poligonoAnterior);
-        if (debug)
-            cout << "[SYS]" << " Pintando aresta que foi cruzada..." << endl;
-        InclusaoPontosPoligonosConvexos(andante, poligonoPosMovimento, P, arestaCruzada, false);
-        incluiPontosPoligonosConvexos = false;
-    }
-
     glutSwapBuffers();
 }
 // **********************************************************************
@@ -404,21 +391,21 @@ bool VerificaPontoDentroLimites(Ponto &p) {
 
     if (p.x > Max.x) {
         if (debug)
-            cout << "\tPonto estava fora dos limites, reposicionando...";
+            cout << "\tPonto estava fora dos limites da janela, reposicionando...";
         p.x = Min.x;
     } else if (p.x < Min.x) {
         if (debug)
-            cout << "\tPonto estava fora dos limites, reposicionando...";
+            cout << "\tPonto estava fora dos limites da janela, reposicionando...";
         p.x = Max.x;
     }
 
     if (p.y > Max.y) {
         if (debug)
-            cout << "\tPonto estava fora dos limites, reposicionando...";
+            cout << "\tPonto estava fora dos limites da janela, reposicionando...";
         p.y = Min.y;
     } else if (p.y < Min.y) {
         if (debug)
-            cout << "\tPonto estava fora dos limites, reposicionando...";
+            cout << "\tPonto estava fora dos limites da janela, reposicionando...";
         p.y = Max.y;
     }
 
@@ -615,7 +602,7 @@ Inclusao de pontos em polígonos convexos utilizando a informacao de vizinhanca 
 
 @return quantas vezes a funcao ProdVetorial foi chamada.
 */
-int InclusaoPontosPoligonosConvexos(Ponto &p, int &poligonoPosMovimento, Poligono &P, int &arestaCruzada, bool debug = true) {
+int InclusaoPontosPoligonosConvexos(Ponto &p, int &poligonoPosMovimento, Poligono &P, int &arestaCruzada) {
     // if (debug)
     //     cout << "[SYS]" << " Fazendo teste de inclusao de pontos em poligonos convexos utilizando a informacao de vizinhanca..." << endl;
 
@@ -671,16 +658,19 @@ int InclusaoPontosPoligonosConvexos(Ponto &p, int &poligonoPosMovimento, Poligon
                 cout << "\t\tSinal do produto vetorial consistente, entao o ponto esta dentro do vizinho " << i + 1 << endl;
             arestaCruzada = i;
             break;
+        } else {
+            if (debug)
+                cout << "\t\tSinal do produto vetorial inconsistente, entao o ponto nao esta dentro do vizinho " << i + 1 << endl;
         }
     }
-    
+
     Poligono PoligonoVizinho;
     for (int i = 0; i < Voro.getNPoligonos(); i++) {
         PoligonoVizinho = Voro.getPoligono(i);
         if (Vizinho == PoligonoVizinho) {
             poligonoPosMovimento = i;
             if (debug)
-                cout << "\tO ponto foi para o poligono " << i << ", que e o " << i + 1 << "o vizinho" << endl;
+                cout << "\tO ponto foi para o poligono " << i << endl;
             break;
         }
     }
@@ -688,63 +678,63 @@ int InclusaoPontosPoligonosConvexos(Ponto &p, int &poligonoPosMovimento, Poligon
     return qtdChamadasProdutoVetorial;
 }
 
-void movePointVertical(Ponto &p, float distance) {
+void movePontoVertical(Ponto &p, float distance) {
     if (debug)
         cout << "[SYS]" << " Movendo ponto verticalmente " << distance << " unidades..." << endl;
     p.y += distance;
 }
 
-void movePointHorizontal(Ponto &p, float distance) {
+void movePontoHorizontal(Ponto &p, float distance) {
     if (debug)
         cout << "[SYS]" << " Movendo ponto horizontalmente " << distance << " unidades..." << endl;
     p.x += distance;
 }
 
-void movePoint(char key) {
+void movePonto(char key) {
     switch (key) {
         case 'q':
             if (debug)
                 cout << "[SYS]" << " Movendo ponto para a diagonal superior esquerda..." << endl;
-            movePointHorizontal(andante, -passoAndante);
-            movePointVertical(andante, passoAndante);
+            movePontoHorizontal(andante, -passoAndante);
+            movePontoVertical(andante, passoAndante);
             break;
         case 'w':
             if (debug)
                 cout << "[SYS]" << " Movendo ponto para cima..." << endl;
-            movePointVertical(andante, passoAndante);
+            movePontoVertical(andante, passoAndante);
             break;
         case 'e':
             if (debug)
                 cout << "[SYS]" << " Movendo ponto para a diagonal superior direita..." << endl;
-            movePointHorizontal(andante, passoAndante);
-            movePointVertical(andante, passoAndante);
+            movePontoHorizontal(andante, passoAndante);
+            movePontoVertical(andante, passoAndante);
             break;
         case 'a':
             if (debug)
                 cout << "[SYS]" << " Movendo ponto para a esquerda..." << endl;
-            movePointHorizontal(andante, -passoAndante);
+            movePontoHorizontal(andante, -passoAndante);
             break;
         case 's':
             if (debug)
                 cout << "[SYS]" << " Movendo ponto para baixo..." << endl;
-            movePointVertical(andante, -passoAndante);
+            movePontoVertical(andante, -passoAndante);
             break;
         case 'd':
             if (debug)
                 cout << "[SYS]" << " Movendo ponto para a direita..." << endl;
-            movePointHorizontal(andante, passoAndante);
+            movePontoHorizontal(andante, passoAndante);
             break;
         case 'z':
             if (debug)
                 cout << "[SYS]" << " Movendo ponto para a diagonal inferior esquerda..." << endl;
-            movePointHorizontal(andante, -passoAndante);
-            movePointVertical(andante, -passoAndante);
+            movePontoHorizontal(andante, -passoAndante);
+            movePontoVertical(andante, -passoAndante);
             break;
         case 'x':
             if (debug)
                 cout << "[SYS]" << " Movendo ponto para baixo..." << endl;
-            movePointVertical(andante, -passoAndante);
-            movePointHorizontal(andante, passoAndante);
+            movePontoVertical(andante, -passoAndante);
+            movePontoHorizontal(andante, passoAndante);
             break;
     }
 
@@ -821,7 +811,7 @@ void keyboard ( unsigned char key, int x, int y )
         case 'd':
         case 'z':
         case 'x':
-            movePoint(key);
+            movePonto(key);
             break;
         case 't':
             ContaTempo(3);
@@ -896,10 +886,15 @@ int  main ( int argc, char** argv )
 
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGB );
-    glutInitWindowPosition(724, 180);
+    // Inicia a janela no centro da tela
+    int larguraTela = glutGet(GLUT_SCREEN_WIDTH);
+    int alturaTela = glutGet(GLUT_SCREEN_HEIGHT);
+    float larguraJanela = 0.6 * larguraTela;
+    float alturaJanela = 0.8 * alturaTela;
+    glutInitWindowPosition(((larguraTela - larguraJanela) / 2) + 0.2 * larguraTela, (alturaTela - alturaJanela) / 2);
 
     // Define o tamanho inicial da janela grafica do programa
-    glutInitWindowSize(1080, 720);
+    glutInitWindowSize(larguraJanela, alturaJanela);
 
     // Cria a janela na tela, definindo o nome da
     // que aparecera na barra de titulo da janela.
