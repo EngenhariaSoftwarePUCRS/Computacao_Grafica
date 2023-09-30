@@ -57,8 +57,9 @@ Ponto Min, Max, PontoClicado;
 Ponto andante;
 int poligonoAnterior = 0;
 bool estaNoAnterior = false;
+bool debug = false;
+int PassoInicial(Ponto &p, bool &inPrevious);
 
-bool desenha = false;
 bool FoiClicado = false;
 
 float angulo=0.0;
@@ -138,25 +139,37 @@ void init()
 
     Voro.LePoligonos("ListaDePoligonos-V2.txt");
     Voro.obtemLimites(Min,Max);
-    Min.imprime("Minimo:", "\n");
-    Max.imprime("Maximo:", "\n");
-
-    andante = Ponto(0, 0, 0);
+    if (debug) {
+        Min.imprime("Minimo:", "\n");
+        Max.imprime("Maximo:", "\n");
+    }
+    Ponto Largura;
+    Largura = Max - Min;
+    Min = Min - Largura * 0.1;
+    Max = Max + Largura * 0.1;
 
     Voro.obtemVizinhosDasArestas();
 
     CoresDosPoligonos = new int[Voro.getNPoligonos()];
+    for (int i = 0; i < Voro.getNPoligonos(); i++)
+        CoresDosPoligonos[i] = i * 2;
 
-    for (int i=0; i<Voro.getNPoligonos(); i++)
-        CoresDosPoligonos[i] = i*2;//rand()%80;
+    // Ajusta a largura da janela logica
+    // em funcao do tamanho dos poligonos
 
-    // Ajusta a largura da janela l�gica
-    // em fun��o do tamanho dos pol�gonos
-    Ponto Largura;
-    Largura = Max - Min;
+    // Cria pontinho que será movido
+    andante = Ponto(7.5, 6);
 
-    Min = Min - Largura * 0.1;
-    Max = Max + Largura * 0.1;
+    bool inside;
+    int qtdChamadasProdutoVetorial = 0;
+    for (int i = 0; i < Voro.getNPoligonos(); i++) {
+        poligonoAnterior = i;
+        cout << "Poligono " << i << endl;
+        qtdChamadasProdutoVetorial += PassoInicial(andante, inside);
+        if (inside)
+            break;
+    }
+    cout << "Chamadas Produto Vetorial Para Descobrir o poligono inicial: " << qtdChamadasProdutoVetorial << endl;
 }
 
 double nFrames=0;
@@ -172,17 +185,19 @@ void animate()
     TempoTotal += dt;
     nFrames++;
 
-    if (AccumDeltaT > 1.0/30) // fixa a atualiza��o da tela em 30
+    if (AccumDeltaT > 1.0/30) // fixa a atualizacao da tela em 30
     {
         AccumDeltaT = 0;
         //angulo+=0.05;
-        glutPostRedisplay();
+        // glutPostRedisplay();
     }
     if (TempoTotal > 50.0)
     {
-        cout << "Tempo Acumulado: "  << TempoTotal << " segundos. " ;
-        cout << "Nros de Frames sem desenho: " << nFrames << endl;
-        cout << "FPS(sem desenho): " << nFrames/TempoTotal << endl;
+        if (debug) {
+            cout << "Tempo Acumulado: "  << TempoTotal << " segundos. " ;
+            cout << "Nros de Frames sem desenho: " << nFrames << endl;
+            cout << "FPS(sem desenho): " << nFrames/TempoTotal << endl;
+        }
         TempoTotal = 0;
         nFrames = 0;
     }
@@ -244,28 +259,14 @@ void DesenhaPonto(Ponto P, int tamanho)
     glEnd();
 }
 // **********************************************************************
-void InterseptaArestas(Poligono P)
-{
-    /*
-    Ponto P1, P2;
-    for (int i=0; i < P.getNVertices();i++)
-    {
-        P.getAresta(i, P1, P2);
-        //if(PassaPelaFaixa(i,F))
-        if (HaInterseccao(PontoClicado,Esq, P1, P2))
-            P.desenhaAresta(i);
-    }*/
-
-}
-// **********************************************************************
 //  void display( void )
 // **********************************************************************
-void display( void )
+void display(void)
 {
 	// Limpa a tela coma cor de fundo
 	glClear(GL_COLOR_BUFFER_BIT);
 
-    // Define os limites l�gicos da area OpenGL dentro da Janela
+    // Define os limites logicos da area OpenGL dentro da Janela
 	glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
@@ -281,44 +282,42 @@ void display( void )
     glLineWidth(2);
 
     Poligono P;
-    for (int i=0; i<Voro.getNPoligonos(); i++)
+    for (int i = 0; i < Voro.getNPoligonos(); i++)
     {
+        P = Voro.getPoligono(i);
+
         defineCor(CoresDosPoligonos[i]);
-        P = Voro.getPoligono(i);
         P.pintaPoligono();
-    }
-    glColor3f(0,0,0);
-    for (int i=0; i<Voro.getNPoligonos(); i++)
-    {
-        P = Voro.getPoligono(i);
+
+        glColor3f(0, 0, 0);
         P.desenhaPoligono();
+
         ImprimeNroDoPoligono(P, i);
     }
 
-    if (desenha)
-    {
-        desenha = false;
-    }
+    Ponto FinalLinha(1000, 0);
+    Ponto InicioLinha(andante - FinalLinha);
+    DesenhaLinha(InicioLinha, andante);
 
-    Ponto Esq;
-    Ponto Dir(-1, 0);
-    Esq = andante + Dir * (1000);
-    glColor3f(1, 1, 1); // R, G, B  [0..1]
-    DesenhaLinha(andante, Esq);
+    // Generate random RGB color
+    float r = (rand() % 1000) / 1000.0;
+    float g = (rand() % 1000) / 1000.0;
+    float b = (rand() % 1000) / 1000.0;
+    glColor3f(r, g, b);
+    DesenhaPonto(andante, 15);
 
-    glColor3f(1, 0, 0);
-    DesenhaPonto(andante, 10);
-
-    glColor3f(1, 0, 1);
+    glColor3f(1, 1, 1);
     Ponto P1, P2;
     for (int i = 0; i < Voro.getNPoligonos(); i++)
     {
         Poligono P = Voro.getPoligono(i);
+        Ponto MaxPol, MinPol;
+        P.obtemLimites(MinPol, MaxPol);
         int nroInterseccoes = 0;
         for (int j = 0; j < P.getNVertices(); j++)
         {
             P.getAresta(j, P1, P2);
-            if (HaInterseccao(andante, Esq, P1, P2)) {
+            if (HaInterseccao(andante, InicioLinha, P1, P2)) {
                 nroInterseccoes++;
                 P.desenhaAresta(j);
             }
@@ -331,33 +330,99 @@ void display( void )
 }
 // **********************************************************************
 // ContaTempo(double tempo)
-//      conta um certo n�mero de segundos e informa quanto frames
-// se passaram neste per�odo.
+//      conta um certo numero de segundos e informa quanto frames
+// se passaram neste periodo.
 // **********************************************************************
 void ContaTempo(double tempo)
 {
     Temporizador T;
 
     unsigned long cont = 0;
-    cout << "Inicio contagem de " << tempo << "segundos ..." << flush;
+
+    if (debug)
+        cout << "Inicio contagem de " << tempo << "segundos ..." << flush;
     while(true)
     {
         tempo -= T.getDeltaT();
         cont++;
         if (tempo <= 0.0)
         {
-            cout << "fim! - Passaram-se " << cont << " frames." << endl;
+            if (debug)
+                cout << "fim! - Passaram-se " << cont << " frames." << endl;
             break;
         }
     }
 }
 
+/**
+Inicialmente o teste deve ser feito para verificar se o ponto ainda está no mesmo polígono que estava antes do último movimento. Se estiver, nenhum outro teste deve ser feito. Como os polígonos são todos convexos, o teste deve ser realizado com o algoritmo de inclusão de pontos em polígonos convexos.
+
+@return quantas vezes a função ProdVetorial foi chamada.
+*/
+int PassoInicial(Ponto &p, bool &inPrevious) {
+    int qtdChamadasProdutoVetorial = 0;
+    bool left, right = false;
+    Poligono P = Voro.getPoligono(poligonoAnterior);
+    Ponto x1, x2;
+    for (int j = 0; j < P.getNVertices(); j++) {
+        P.getAresta(j, x1, x2);
+        Ponto direcao = x2 - x1;
+        Ponto pontoAoVerticeInicial = x1 - p;
+        qtdChamadasProdutoVetorial++;
+        Ponto CrossProduct;
+        ProdVetorial(direcao, pontoAoVerticeInicial, CrossProduct);
+        float produtoVetorial = CrossProduct.z;
+        if (produtoVetorial > 0)
+            right = true;
+        else if (produtoVetorial < 0)
+            left = true;
+    }
+    // Se, para todos os lados do polígono, o sinal do produto vetorial for consistente (ou seja, todos positivos ou todos negativos), o ponto está dentro do polígono, e você define inside como verdadeiro.
+    if ((right && !left) || (!right && left))
+        inPrevious = true;
+
+    return qtdChamadasProdutoVetorial;
+}
+
+/**
+Inclusão de pontos em polígonos côncavos:  O teste de inclusão deve ser realizado 
+somente com os polígonos cujos envelopes cruzarem a linha horizontal usada para o teste. 
+
+@return quantas vezes a função HaIntersecao foi chamada. 
+*/
+// int InclusaoPontosPoligonosConcavos(Ponto &p) {
+//     int qtdChamadasHaInterseccao = 0;
+//     Ponto P1, P2;
+//     for (int i = 0; i < Voro.getNPoligonos(); i++) {
+//         Poligono P = Voro.getPoligono(i);
+//         Ponto MaxPol, MinPol;
+//         P.obtemLimites(MinPol, MaxPol);
+//         if (p.y > MinPol.y && p.y < MaxPol.y && p.x > MinPol.x && p.x < MaxPol.x) {
+//             int nroInterseccoes = 0;
+//             for (int j = 0; j < P.getNVertices(); j++) {
+//                 P.getAresta(j, P1, P2);
+//                 qtdChamadasHaInterseccao++;
+//                 if (HaInterseccao(p, P1, P2)) {
+//                     nroInterseccoes++;
+//                     P.desenhaAresta(j);
+//                 }
+//             }
+//             if (nroInterseccoes % 2 == 1) {
+//                 cout << "Ponto dentro do poligono" << endl;
+//                 poligonoAnterior = i;
+//                 break;
+//             }
+//         }
+//     }
+
+//     return qtdChamadasHaInterseccao;
+// }
+
 int checkPointPosition(Ponto &p) {
-    Ponto Esq;
-    Ponto Dir(-1, 0);
-    Esq = andante + Dir * (1000);
-    glColor3f(1, 1, 1); // R, G, B  [0..1]
-    DesenhaLinha(andante, Esq);
+    Ponto FinalLinha(1000, 0);
+    Ponto InicioLinha(andante - FinalLinha);
+    glColor3f(1, 1, 1);
+    DesenhaLinha(InicioLinha, andante);
 
     glColor3f(1, 0, 0);
     DesenhaPonto(andante, 10);
@@ -370,17 +435,19 @@ int checkPointPosition(Ponto &p) {
     for (int i = 0; i < Voro.getNPoligonos(); i++)
     {
         Poligono P = Voro.getPoligono(i);
+        Ponto MaxPol, MinPol;
+        P.obtemLimites(MinPol, MaxPol);
         int nroInterseccoes = 0;
         for (int j = 0; j < P.getNVertices(); j++)
         {
             P.getAresta(j, P1, P2);
             qtdChamadasProdutoVetorial++;
-            if (HaInterseccao(andante, Esq, P1, P2)) {
+            if (HaInterseccao(andante, InicioLinha, P1, P2)) {
                 nroInterseccoes++;
                 P.desenhaAresta(j);
             }
         }
-        if (nroInterseccoes > 0) {
+        // if (nroInterseccoes > 0) {
             cout << "\nAnalisando novo poligono" << endl;
             cout << "Nro int com o poligono " << i << " = " << nroInterseccoes << endl;
             if (nroInterseccoes % 2 == 1) {
@@ -389,7 +456,7 @@ int checkPointPosition(Ponto &p) {
                 break;
             } else
                 cout << "Ponto fora do poligono" << endl;
-        }
+        // }
     }
 
     cout << "Pol anterior " << poligonoAnterior << endl;
@@ -398,7 +465,7 @@ int checkPointPosition(Ponto &p) {
     return qtdChamadasProdutoVetorial;
 }
 
-void checkPointInBounds(Ponto &p) {
+bool checkPointInBounds(Ponto &p) {
     if (p.x > Max.x)
         p.x = Min.x;
     else if (p.x < Min.x)
@@ -408,6 +475,17 @@ void checkPointInBounds(Ponto &p) {
         p.y = Min.y;
     else if (p.y < Min.y)
         p.y = Max.y;
+
+    bool inBounds = true;
+    Ponto Min, Max;
+    Voro.obtemLimites(Min, Max);
+
+    if (p.x < Min.x || p.x > Max.x)
+        inBounds = false;
+    if (p.y < Min.y || p.y > Max.y)
+        inBounds = false;
+
+    return inBounds;
 }
 
 void movePointVertical(Ponto &p, float distance) {
@@ -433,14 +511,34 @@ void movePoint(char key) {
             movePointHorizontal(andante, 0.3);
             break;
     }
-    checkPointInBounds(andante);
-    int pAnterior = poligonoAnterior;
-    checkPointPosition(andante);
-    if (pAnterior == poligonoAnterior) {
+    
+    // Passo Opcional: Checar se o ponto esta entre os polígonos
+    cout << "\t[SYS]" << "Checando se o ponto esta dentro da área do diagrama..." << endl;
+    bool inBounds = checkPointInBounds(andante);
+    if (!inBounds) {
+        cout << "Me poe pra dentro por favor ._." << endl;
+        return;
+    }
+
+    // Passo 0: Checar se o ponto esta no mesmo polígono que estava antes do último movimento
+    cout << "\t[SYS]" << "Checando se o ponto esta no mesmo polígono que estava antes do último movimento..." << endl;
+    bool inPrevious;
+    int qtdChamadasProdutoVetorial = PassoInicial(andante, inPrevious);
+    cout << "Chamadas Produto Vetorial (Passo Inicial): " << qtdChamadasProdutoVetorial << endl;
+    if (inPrevious) {
         cout << "Sigo no mesmo poligono" << endl;
         return;
     }
-    cout << "Segui a vida, livre" << endl;
+
+    // Passo 1: Inclusao de pontos em poligonos concavos
+    cout << "\t[SYS]" << "Inclusao de pontos em poligonos concavos..." << endl;
+    // int qtdChamadasHaInterseccao = InclusaoPontosPoligonosConcavos(andante);
+
+    // Passo 2: Inclusao de pontos em poligonos convexos
+    cout << "Passo 2: Inclusao de pontos em poligonos convexos" << endl;
+
+    // Passo 3: Inclusao de pontos em poligonos convexos utilizando a informação de vizinhança
+    cout << "Passo 3: Inclusao de pontos em poligonos convexos utilizando a informação de vizinhança" << endl;
 }
 // **********************************************************************
 //  void keyboard ( unsigned char key, int x, int y )
@@ -460,9 +558,6 @@ void keyboard ( unsigned char key, int x, int y )
             break;
         case 't':
             ContaTempo(3);
-            break;
-        case ' ':
-            desenha = !desenha;
             break;
 		default:
 			break;
@@ -506,7 +601,8 @@ void Mouse(int button,int state,int x,int y)
       return;
     if(button!=GLUT_LEFT_BUTTON)
      return;
-    cout << "Botao da Esquerda! ";
+    if (debug)
+        cout << "Botao da Esquerda! ";
 
     glGetIntegerv(GL_VIEWPORT,viewport);
     y=viewport[3]-y;
@@ -527,58 +623,58 @@ void Mouse(int button,int state,int x,int y)
 // **********************************************************************
 int  main ( int argc, char** argv )
 {
-    cout << "Programa OpenGL" << endl;
+    if (debug)
+        cout << "Programa OpenGL" << endl;
 
-    glutInit            ( &argc, argv );
-    glutInitDisplayMode (GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGB );
-    glutInitWindowPosition (0,0);
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGB );
+    glutInitWindowPosition(724, 180);
 
     // Define o tamanho inicial da janela grafica do programa
-    glutInitWindowSize  ( 650, 500);
+    glutInitWindowSize(1080, 720);
 
     // Cria a janela na tela, definindo o nome da
     // que aparecera na barra de titulo da janela.
-    glutCreateWindow    ( "Poligonos em OpenGL" );
+    glutCreateWindow("Trabalho 1 - Felipe Freitas e Lucas Wolschick - Computacao Grafica - 2023/2 - Prof. Marcio Pinho");
 
-    // executa algumas inicializa��es
-    init ();
-
-    // Define que o tratador de evento para
-    // o redesenho da tela. A funcao "display"
-    // ser� chamada automaticamente quando
-    // for necess�rio redesenhar a janela
-    glutDisplayFunc ( display );
+    // executa algumas inicializacoes
+    init();
 
     // Define que o tratador de evento para
-    // o invalida��o da tela. A funcao "display"
-    // ser� chamada automaticamente sempre que a
-    // m�quina estiver ociosa (idle)
+    // o redesenho da tela sera a funcao "display"
+    // Esta sera chamada automaticamente quando
+    // for necessario redesenhar a janela
+    glutDisplayFunc(display);
+
+    // Define que o tratador de evento para
+    // a invalidacao da tela e a funcao "animate"
+    // Esta sera chamada automaticamente sempre que a
+    // maquina estiver ociosa (idle)
     glutIdleFunc(animate);
 
     // Define que o tratador de evento para
-    // o redimensionamento da janela. A funcao "reshape"
-    // ser� chamada automaticamente quando
-    // o usu�rio alterar o tamanho da janela
-    glutReshapeFunc ( reshape );
+    // o redimensionamento da janela e  funcao "reshape"
+    // Esta sera chamada automaticamente quando
+    // o usuario alterar o tamanho da janela
+    glutReshapeFunc(reshape);
 
     // Define que o tratador de evento para
-    // as teclas. A funcao "keyboard"
-    // ser� chamada automaticamente sempre
-    // o usu�rio pressionar uma tecla comum
-    glutKeyboardFunc ( keyboard );
+    // as teclas e a funcao "keyboard"
+    // Esta sera chamada automaticamente sempre
+    // o usuario pressionar uma tecla comum
+    glutKeyboardFunc(keyboard);
 
     // Define que o tratador de evento para
     // as teclas especiais(F1, F2,... ALT-A,
-    // ALT-B, Teclas de Seta, ...).
-    // A funcao "arrow_keys" ser� chamada
-    // automaticamente sempre o usu�rio
-    // pressionar uma tecla especial
-    glutSpecialFunc ( arrow_keys );
+    // ALT-B, Teclas de Seta, ...) e a funcao "arrow_keys"
+    // Esta sera chamada automaticamente sempre
+    // que o usuario pressionar uma tecla especial
+    glutSpecialFunc(arrow_keys);
 
     glutMouseFunc(Mouse);
 
     // inicia o tratamento dos eventos
-    glutMainLoop ( );
+    glutMainLoop();
 
     return 0;
 }

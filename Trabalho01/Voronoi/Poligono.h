@@ -35,9 +35,11 @@ class Poligono
     vector <Ponto> Vertices;
     vector <Poligono *> Vizinhos;
     Ponto Min, Max;
+    bool debug;
 public:
     Envelope envelope;
     Poligono();
+    void envelopa();
     Ponto getVertice(int);
     Poligono* getVizinho(int);
     unsigned long getNVertices();

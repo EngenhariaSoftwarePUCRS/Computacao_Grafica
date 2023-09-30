@@ -13,7 +13,7 @@ ifstream input;
 
 Voronoi::Voronoi()
 {
-
+    debug = false;
 }
 
 Poligono Voronoi::LeUmPoligono()
@@ -26,15 +26,18 @@ Poligono Voronoi::LeUmPoligono()
         double x,y;
         // Le um ponto
         input >> x >> y;
-        Ponto(x, y).imprime();
+        if (debug)
+            Ponto(x, y).imprime();
         if(!input)
         {
-            cout << "Fim inesperado da linha." << endl;
+            if (debug)
+                cout << "Fim inesperado da linha." << endl;
             break;
         }
         P.insereVertice(Ponto(x,y));
     }
-    cout << "Poligono lido com sucesso!" << endl;
+    if (debug)
+        cout << "Poligono lido com sucesso!" << endl;
     return P;
 }
 
@@ -43,13 +46,15 @@ void Voronoi::LePoligonos(const char *nome)
     input.open(nome, ios::in); //arq.open(nome, ios::out);
     if (!input)
     {
-        cout << "Erro ao abrir " << nome << ". " << endl;
+        if (debug)
+            cout << "Erro ao abrir " << nome << ". " << endl;
         exit(0);
     }
     string S;
 
     input >> qtdDePoligonos;
-    cout << "qtdDePoligonos:" << qtdDePoligonos << endl;
+    if (debug)
+        cout << "qtdDePoligonos:" << qtdDePoligonos << endl;
     Ponto A, B;
     Diagrama[0] = LeUmPoligono();
     Diagrama[0].obtemLimites(Min, Max);// obtem o envelope do poligono
@@ -63,14 +68,16 @@ void Voronoi::LePoligonos(const char *nome)
         Min = ObtemMinimo (A, Min);
         Max = ObtemMaximo (B, Max);
     }
-    cout << "Lista de Poligonos lida com sucesso!" << endl;
+    if (debug)
+        cout << "Lista de Poligonos lida com sucesso!" << endl;
 }
 
 Poligono Voronoi::getPoligono(int i)
 {
     if (i >= qtdDePoligonos)
     {
-        cout << "Nro de Poligono Inexistente" << endl;
+        if (debug)
+            cout << "Nro de Poligono Inexistente" << endl;
         return Diagrama[0];
     }
     return Diagrama[i];

@@ -10,10 +10,16 @@
 using namespace std;
 
 #include "Poligono.h"
+#include "Envelope.h"
 
 Poligono::Poligono()
 {
+    debug = false;
+}
 
+void Poligono::envelopa() {
+    Ponto Min, Max;
+    envelope = Envelope(Min, Max);
 }
 
 void Poligono::insereVertice(Ponto p)
@@ -30,7 +36,8 @@ void Poligono::insereVertice(Ponto p, int pos)
 {
     if ((pos < 0) || (pos>Vertices.size()))
     {
-        cout << "Metodo " << __FUNCTION__ << ". Posicao Invalida. Vertice nao inserido." << endl;
+        if (debug)
+            cout << "Metodo " << __FUNCTION__ << ". Posicao Invalida. Vertice nao inserido." << endl;
         return;
     }
     Vertices.insert(Vertices.begin()+pos, p);
@@ -40,7 +47,8 @@ void Poligono::insereVizinho(Poligono *P, int pos)
 {
     if ((pos < 0) || (pos>Vizinhos.size()))
     {
-        cout << "Metodo " << __FUNCTION__ << ". Posicao Invalida. Vizinho nao inserido." << endl;
+        if (debug)
+            cout << "Metodo " << __FUNCTION__ << ". Posicao Invalida. Vizinho nao inserido." << endl;
         return;
     }
     Vizinhos.insert(Vizinhos.begin()+pos, P);
@@ -119,10 +127,12 @@ void Poligono::LePoligono(const char *nome)
     input.open(nome, ios::in); //arq.open(nome, ios::out);
     if (!input)
     {
-        cout << "Erro ao abrir " << nome << ". " << endl;
+        if (debug)
+            cout << "Erro ao abrir " << nome << ". " << endl;
         exit(0);
     }
-    cout << "Lendo arquivo " << nome << "...";
+    if (debug)
+        cout << "Lendo arquivo " << nome << "...";
     string S;
     //int nLinha = 0;
     unsigned int qtdVertices;
@@ -139,7 +149,8 @@ void Poligono::LePoligono(const char *nome)
         //nLinha++;
         insereVertice(Ponto(x,y));
     }
-    cout << "Poligono lido com sucesso!" << endl;
+    if (debug)
+        cout << "Poligono lido com sucesso!" << endl;
     input.close();
 }
 

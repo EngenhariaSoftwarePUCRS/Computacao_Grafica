@@ -21,6 +21,7 @@ class Voronoi
     Poligono Diagrama[1000];
     unsigned int qtdDePoligonos;
     Ponto Min, Max;
+    bool debug;
 public:
     Voronoi();
     Poligono LeUmPoligono();
