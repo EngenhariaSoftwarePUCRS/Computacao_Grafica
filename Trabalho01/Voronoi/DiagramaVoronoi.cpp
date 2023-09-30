@@ -96,9 +96,9 @@ void Voronoi::obtemLimites(Ponto &min, Ponto &max)
 
 void Voronoi::obtemVizinhosDasArestas()
 {
-    for (int i = 0; i < this->getNPoligonos(); i++) {
+    for (int i = 0; i < qtdDePoligonos; i++) {
         Poligono p1 = this->getPoligono(i);
-        Poligono p2 = this->getPoligono((i + 1) % this->getNPoligonos());
+        Poligono p2 = this->getPoligono((i + 1) % qtdDePoligonos);
 
         for (int j = 0; j < p1.getNVertices(); j++) {
             Ponto p1a = p1.getVertice(j);

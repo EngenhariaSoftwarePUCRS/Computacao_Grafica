@@ -474,7 +474,7 @@
 1695951307 source:d:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\envelope.cpp
 	"Envelope.h"
 
-1696058861 source:d:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\exibevariospoligonos.cpp
+1696061923 source:d:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\exibevariospoligonos.cpp
 	<iostream>
 	<cmath>
 	<ctime>
@@ -491,7 +491,7 @@
 	"ListaDeCoresRGB.h"
 	"Temporizador.h"
 
-1696059463 d:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\listadecoresrgb.h
+1696061622 d:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\listadecoresrgb.h
 	<iostream>
 	<cmath>
 	<ctime>
@@ -507,7 +507,7 @@
 	<windows.h>
 	<sys/time.h>
 
-1696059358 source:d:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\listadecoresrgb.cpp
+1696061622 source:d:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\listadecoresrgb.cpp
 	"ListaDeCoresRGB.h"
 
 1696056166 source:d:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho01\voronoi\poligono.cpp

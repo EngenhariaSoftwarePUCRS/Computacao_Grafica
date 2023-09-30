@@ -145,7 +145,7 @@ void init()
     // Define a cor do fundo da tela (AZUL)
     glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 
-    Voro.LePoligonos("VoronoiGenerator/20.txt");
+    Voro.LePoligonos("VoronoiGenerator/5.txt");
     Voro.obtemLimites(Min, Max);
     if (debug) {
         Min.imprime("Minimo:", "\n");
