@@ -109,8 +109,8 @@ void Voronoi::obtemVizinhosDasArestas()
                 Ponto p2b = p2.getVertice((k + 1) % p2.getNVertices());
 
                 if (p1a == p2b && p1b == p2a) {
-                    p1.insereVizinho(&p2);
-                    p2.insereVizinho(&p1);
+                    p1.insereVizinho(p2);
+                    p2.insereVizinho(p1);
                 }
             }
         }

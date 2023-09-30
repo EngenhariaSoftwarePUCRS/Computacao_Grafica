@@ -33,7 +33,7 @@ using namespace std;
 class Poligono
 {
     vector <Ponto> Vertices;
-    vector <Poligono *> Vizinhos;
+    vector <Poligono> Vizinhos;
     Ponto Min, Max;
     bool debug;
 public:
@@ -41,13 +41,13 @@ public:
     Poligono();
     void envelopa();
     Ponto getVertice(int);
-    Poligono* getVizinho(int);
+    Poligono getVizinho(int);
     unsigned long getNVertices();
     unsigned long getNVizinhos();
     void insereVertice(Ponto);
     void insereVertice(Ponto p, int pos);
-    void insereVizinho(Poligono *P);
-    void insereVizinho(Poligono *P, int pos);
+    void insereVizinho(Poligono P);
+    void insereVizinho(Poligono P, int pos);
     void desenhaPoligono();
     void desenhaVertices();
     void pintaPoligono();

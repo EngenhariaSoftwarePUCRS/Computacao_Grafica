@@ -27,7 +27,7 @@ void Poligono::insereVertice(Ponto p)
     Vertices.push_back(p);
 }
 
-void Poligono::insereVizinho(Poligono *P)
+void Poligono::insereVizinho(Poligono P)
 {
     Vizinhos.push_back(P);
 }
@@ -43,7 +43,7 @@ void Poligono::insereVertice(Ponto p, int pos)
     Vertices.insert(Vertices.begin()+pos, p);
 }
 
-void Poligono::insereVizinho(Poligono *P, int pos)
+void Poligono::insereVizinho(Poligono P, int pos)
 {
     if ((pos < 0) || (pos>Vizinhos.size()))
     {
@@ -54,7 +54,7 @@ void Poligono::insereVizinho(Poligono *P, int pos)
     Vizinhos.insert(Vizinhos.begin()+pos, P);
 }
 
-Poligono* Poligono::getVizinho(int i)
+Poligono Poligono::getVizinho(int i)
 {
     return Vizinhos[i];
 }
