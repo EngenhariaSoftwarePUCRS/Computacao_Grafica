@@ -1,11 +1,17 @@
 // **********************************************************************
-// PUCRS/Escola Polit�cnica
-// COMPUTA��O GR�FICA
+// PUCRS/Escola Politecnica
+// COMPUTACAO GRAFICA
 //
 // Programa basico para criar aplicacoes 2D em OpenGL
 //
 // Marcio Sarroglia Pinho
 // pinho@pucrs.br
+// 
+// Felipe Freitas Silva
+// f.freitas007@edu.pucrs.br
+// 
+// Lucas Wolschick
+// lucas.wolschick@edu.pucrs.br
 // **********************************************************************
 
 // Para uso no Xcode:
@@ -54,15 +60,16 @@ int *CoresDosPoligonos;
 // Limites logicos da area de desenho
 Ponto Min, Max, PontoClicado;
 
-Ponto andante;
-int poligonoAnterior = 0;
-bool estaNoAnterior = false;
-bool debug = false;
-int PassoInicial(Ponto &p, bool &inPrevious);
-
 bool FoiClicado = false;
 
-float angulo=0.0;
+float angulo = 0.0;
+
+// Variáveis e declarações de função criadas para a resolução do trabalho
+Ponto andante;
+int poligonoAnterior = 0;
+bool debug, incluiPontosPoligonosConcavos;
+int PassoInicial(Ponto &p, bool &estaNoPoligonoAnterior);
+int InclusaoPontosPoligonosConcavos(Ponto &p);
 
 // **********************************************************************
 //
@@ -154,9 +161,6 @@ void init()
     for (int i = 0; i < Voro.getNPoligonos(); i++)
         CoresDosPoligonos[i] = i * 2;
 
-    // Ajusta a largura da janela logica
-    // em funcao do tamanho dos poligonos
-
     // Cria pontinho que será movido
     andante = Ponto(7.5, 6);
 
@@ -164,12 +168,13 @@ void init()
     int qtdChamadasProdutoVetorial = 0;
     for (int i = 0; i < Voro.getNPoligonos(); i++) {
         poligonoAnterior = i;
-        cout << "Poligono " << i << endl;
+        if (debug)
+            cout << "Analisando se estou dentro do poligono " << i << endl;
         qtdChamadasProdutoVetorial += PassoInicial(andante, inside);
         if (inside)
             break;
     }
-    cout << "Chamadas Produto Vetorial Para Descobrir o poligono inicial: " << qtdChamadasProdutoVetorial << endl;
+    cout << "Quantidade de chamadas para ProdVetorial para descobrir o poligono inicial: " << qtdChamadasProdutoVetorial << endl;
 }
 
 double nFrames=0;
@@ -263,6 +268,8 @@ void DesenhaPonto(Ponto P, int tamanho)
 // **********************************************************************
 void display(void)
 {
+    if (debug)
+        cout << "[refreshing display]" << endl;
 	// Limpa a tela coma cor de fundo
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -275,12 +282,13 @@ void display(void)
 	// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	glLineWidth(1);
-	glColor3f(1,1,1); // R, G, B  [0..1]
+	glColor3f(1, 1, 1); // R, G, B  [0..1]
     DesenhaEixos();
 
-    glRotatef(angulo, 0,0,1);
+    glRotatef(angulo, 0, 0, 1);
     glLineWidth(2);
 
+    // Desenha os poligonos
     Poligono P;
     for (int i = 0; i < Voro.getNPoligonos(); i++)
     {
@@ -295,35 +303,18 @@ void display(void)
         ImprimeNroDoPoligono(P, i);
     }
 
-    Ponto FinalLinha(1000, 0);
-    Ponto InicioLinha(andante - FinalLinha);
-    DesenhaLinha(InicioLinha, andante);
-
-    // Generate random RGB color
+    // Gera uma cor aleatória para o ponto cada vez que ele é movido
     float r = (rand() % 1000) / 1000.0;
     float g = (rand() % 1000) / 1000.0;
     float b = (rand() % 1000) / 1000.0;
     glColor3f(r, g, b);
-    DesenhaPonto(andante, 15);
+    DesenhaPonto(andante, 12);
 
-    glColor3f(1, 1, 1);
-    Ponto P1, P2;
-    for (int i = 0; i < Voro.getNPoligonos(); i++)
-    {
-        Poligono P = Voro.getPoligono(i);
-        Ponto MaxPol, MinPol;
-        P.obtemLimites(MinPol, MaxPol);
-        int nroInterseccoes = 0;
-        for (int j = 0; j < P.getNVertices(); j++)
-        {
-            P.getAresta(j, P1, P2);
-            if (HaInterseccao(andante, InicioLinha, P1, P2)) {
-                nroInterseccoes++;
-                P.desenhaAresta(j);
-            }
-        }
-        if (nroInterseccoes % 2 == 1)
-            break;
+    // Desenha a linha na tela até o ponto quando o método de inclusão de pontos em polígonos côncavos é chamado
+    if (incluiPontosPoligonosConcavos) {
+        int qtdChamadasHaInterseccao = InclusaoPontosPoligonosConcavos(andante);
+        incluiPontosPoligonosConcavos = false;
+        cout << "Chamadas HaInterseccao (InclusaoPontosPoligonosConcavos): " << qtdChamadasHaInterseccao << endl;
     }
 
     glutSwapBuffers();
@@ -359,9 +350,9 @@ Inicialmente o teste deve ser feito para verificar se o ponto ainda está no mes
 
 @return quantas vezes a função ProdVetorial foi chamada.
 */
-int PassoInicial(Ponto &p, bool &inPrevious) {
+int PassoInicial(Ponto &p, bool &estaNoPoligonoAnterior) {
     int qtdChamadasProdutoVetorial = 0;
-    bool left, right = false;
+    bool left = false, right = false;
     Poligono P = Voro.getPoligono(poligonoAnterior);
     Ponto x1, x2;
     for (int j = 0; j < P.getNVertices(); j++) {
@@ -378,94 +369,62 @@ int PassoInicial(Ponto &p, bool &inPrevious) {
             left = true;
     }
     // Se, para todos os lados do polígono, o sinal do produto vetorial for consistente (ou seja, todos positivos ou todos negativos), o ponto está dentro do polígono, e você define inside como verdadeiro.
-    if ((right && !left) || (!right && left))
-        inPrevious = true;
+    if (right != left)
+        estaNoPoligonoAnterior = true;
 
     return qtdChamadasProdutoVetorial;
 }
 
 /**
-Inclusão de pontos em polígonos côncavos:  O teste de inclusão deve ser realizado 
-somente com os polígonos cujos envelopes cruzarem a linha horizontal usada para o teste. 
+Inclusão de pontos em polígonos côncavos:  O teste de inclusão deve ser realizado
+somente com os polígonos cujos envelopes cruzarem a linha horizontal usada para o teste.
 
-@return quantas vezes a função HaIntersecao foi chamada. 
+@return quantas vezes a função HaIntersecao foi chamada.
 */
-// int InclusaoPontosPoligonosConcavos(Ponto &p) {
-//     int qtdChamadasHaInterseccao = 0;
-//     Ponto P1, P2;
-//     for (int i = 0; i < Voro.getNPoligonos(); i++) {
-//         Poligono P = Voro.getPoligono(i);
-//         Ponto MaxPol, MinPol;
-//         P.obtemLimites(MinPol, MaxPol);
-//         if (p.y > MinPol.y && p.y < MaxPol.y && p.x > MinPol.x && p.x < MaxPol.x) {
-//             int nroInterseccoes = 0;
-//             for (int j = 0; j < P.getNVertices(); j++) {
-//                 P.getAresta(j, P1, P2);
-//                 qtdChamadasHaInterseccao++;
-//                 if (HaInterseccao(p, P1, P2)) {
-//                     nroInterseccoes++;
-//                     P.desenhaAresta(j);
-//                 }
-//             }
-//             if (nroInterseccoes % 2 == 1) {
-//                 cout << "Ponto dentro do poligono" << endl;
-//                 poligonoAnterior = i;
-//                 break;
-//             }
-//         }
-//     }
+int InclusaoPontosPoligonosConcavos(Ponto &p) {
+    int qtdChamadasHaInterseccao = 0;
 
-//     return qtdChamadasHaInterseccao;
-// }
-
-int checkPointPosition(Ponto &p) {
     Ponto FinalLinha(1000, 0);
     Ponto InicioLinha(andante - FinalLinha);
     glColor3f(1, 1, 1);
     DesenhaLinha(InicioLinha, andante);
 
-    glColor3f(1, 0, 0);
-    DesenhaPonto(andante, 10);
+    Poligono P;
+    for (int i = 0; i < Voro.getNPoligonos(); i++) {
+        if (i == poligonoAnterior)
+            continue;
 
-    glColor3f(1, 0, 1);
-    Ponto P1, P2;
-    int qtdChamadasProdutoVetorial = 0;
-    cout << "\n\n===============================" << endl;
-    cout << "Pol anterior " << poligonoAnterior << endl;
-    for (int i = 0; i < Voro.getNPoligonos(); i++)
-    {
-        Poligono P = Voro.getPoligono(i);
+        P = Voro.getPoligono(i);
         Ponto MaxPol, MinPol;
         P.obtemLimites(MinPol, MaxPol);
+
+        if (andante.y > MaxPol.y || andante.y < MinPol.y)
+            continue;
+
+        if (!incluiPontosPoligonosConcavos && debug)
+            cout << "Pelo algo das faixas, o poligono " << i << " pode conter o ponto" << endl;
+
         int nroInterseccoes = 0;
+        Ponto pA, pB;
         for (int j = 0; j < P.getNVertices(); j++)
         {
-            P.getAresta(j, P1, P2);
-            qtdChamadasProdutoVetorial++;
-            if (HaInterseccao(andante, InicioLinha, P1, P2)) {
+            P.getAresta(j, pA, pB);
+            qtdChamadasHaInterseccao++;
+            if (HaInterseccao(andante, InicioLinha, pA, pB)) {
                 nroInterseccoes++;
                 P.desenhaAresta(j);
             }
         }
-        // if (nroInterseccoes > 0) {
-            cout << "\nAnalisando novo poligono" << endl;
-            cout << "Nro int com o poligono " << i << " = " << nroInterseccoes << endl;
-            if (nroInterseccoes % 2 == 1) {
-                cout << "Ponto dentro do poligono" << endl;
-                poligonoAnterior = i;
-                break;
-            } else
-                cout << "Ponto fora do poligono" << endl;
-        // }
+        if (nroInterseccoes % 2 == 1) {
+            poligonoAnterior = i;
+            break;
+        }
     }
 
-    cout << "Pol anterior " << poligonoAnterior << endl;
-    glutPostRedisplay();
-
-    return qtdChamadasProdutoVetorial;
+    return qtdChamadasHaInterseccao;
 }
 
-bool checkPointInBounds(Ponto &p) {
+bool VerificaPontoDentroLimites(Ponto &p) {
     if (p.x > Max.x)
         p.x = Min.x;
     else if (p.x < Min.x)
@@ -476,16 +435,16 @@ bool checkPointInBounds(Ponto &p) {
     else if (p.y < Min.y)
         p.y = Max.y;
 
-    bool inBounds = true;
+    bool dentroLimites = true;
     Ponto Min, Max;
     Voro.obtemLimites(Min, Max);
 
     if (p.x < Min.x || p.x > Max.x)
-        inBounds = false;
+        dentroLimites = false;
     if (p.y < Min.y || p.y > Max.y)
-        inBounds = false;
+        dentroLimites = false;
 
-    return inBounds;
+    return dentroLimites;
 }
 
 void movePointVertical(Ponto &p, float distance) {
@@ -498,7 +457,15 @@ void movePointHorizontal(Ponto &p, float distance) {
 
 void movePoint(char key) {
     switch (key) {
+        case 'q':
+            movePointHorizontal(andante, -0.3);
+            movePointVertical(andante, 0.3);
+            break;
         case 'w':
+            movePointVertical(andante, 0.3);
+            break;
+        case 'e':
+            movePointHorizontal(andante, 0.3);
             movePointVertical(andante, 0.3);
             break;
         case 'a':
@@ -511,28 +478,30 @@ void movePoint(char key) {
             movePointHorizontal(andante, 0.3);
             break;
     }
-    
+
+    cout << "\n\n========================================================================" << endl;
+
     // Passo Opcional: Checar se o ponto esta entre os polígonos
-    cout << "\t[SYS]" << "Checando se o ponto esta dentro da área do diagrama..." << endl;
-    bool inBounds = checkPointInBounds(andante);
-    if (!inBounds) {
+    cout << "\t[SYS]" << "Checando se o ponto esta dentro da area do diagrama..." << endl;
+    bool dentroLimites = VerificaPontoDentroLimites(andante);
+    if (!dentroLimites) {
         cout << "Me poe pra dentro por favor ._." << endl;
         return;
     }
 
-    // Passo 0: Checar se o ponto esta no mesmo polígono que estava antes do último movimento
-    cout << "\t[SYS]" << "Checando se o ponto esta no mesmo polígono que estava antes do último movimento..." << endl;
-    bool inPrevious;
-    int qtdChamadasProdutoVetorial = PassoInicial(andante, inPrevious);
+    // Passo 0: Checar se o ponto esta no mesmo poligono que estava antes do último movimento
+    cout << "\t[SYS]" << "Checando se o ponto esta no mesmo poligono que estava antes do último movimento..." << endl;
+    bool estaNoPoligonoAnterior = false;
+    int qtdChamadasProdutoVetorial = PassoInicial(andante, estaNoPoligonoAnterior);
     cout << "Chamadas Produto Vetorial (Passo Inicial): " << qtdChamadasProdutoVetorial << endl;
-    if (inPrevious) {
-        cout << "Sigo no mesmo poligono" << endl;
+    if (estaNoPoligonoAnterior) {
+        cout << "Sigo no mesmo poligono (" << poligonoAnterior << ")" << endl;
         return;
     }
 
     // Passo 1: Inclusao de pontos em poligonos concavos
     cout << "\t[SYS]" << "Inclusao de pontos em poligonos concavos..." << endl;
-    // int qtdChamadasHaInterseccao = InclusaoPontosPoligonosConcavos(andante);
+    incluiPontosPoligonosConcavos = true;
 
     // Passo 2: Inclusao de pontos em poligonos convexos
     cout << "Passo 2: Inclusao de pontos em poligonos convexos" << endl;
@@ -547,10 +516,12 @@ void keyboard ( unsigned char key, int x, int y )
 {
 	switch ( key )
 	{
-		case 27:        // Termina o programa qdo
-			exit ( 0 );   // a tecla ESC for pressionada
+		case 27: // ESC
+			exit(0);
 			break;
+        case 'q':
         case 'w':
+        case 'e':
         case 'a':
         case 's':
         case 'd':
