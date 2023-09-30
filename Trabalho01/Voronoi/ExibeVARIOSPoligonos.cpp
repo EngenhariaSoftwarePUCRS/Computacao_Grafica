@@ -346,6 +346,34 @@ void ContaTempo(double tempo)
 }
 
 /**
+Verifica se o ponto P está dentro da janela de visualização.
+
+@return true se o ponto está dentro da janela do diagrama de Voronoi, false caso contrário.
+*/
+bool VerificaPontoDentroLimites(Ponto &p) {
+    if (p.x > Max.x)
+        p.x = Min.x;
+    else if (p.x < Min.x)
+        p.x = Max.x;
+
+    if (p.y > Max.y)
+        p.y = Min.y;
+    else if (p.y < Min.y)
+        p.y = Max.y;
+
+    bool dentroLimites = true;
+    Ponto Min, Max;
+    Voro.obtemLimites(Min, Max);
+
+    if (p.x < Min.x || p.x > Max.x)
+        dentroLimites = false;
+    if (p.y < Min.y || p.y > Max.y)
+        dentroLimites = false;
+
+    return dentroLimites;
+}
+
+/**
 Inicialmente o teste deve ser feito para verificar se o ponto ainda está no mesmo polígono que estava antes do último movimento. Se estiver, nenhum outro teste deve ser feito. Como os polígonos são todos convexos, o teste deve ser realizado com o algoritmo de inclusão de pontos em polígonos convexos.
 
 @return quantas vezes a função ProdVetorial foi chamada.
@@ -355,13 +383,16 @@ int PassoInicial(Ponto &p, bool &estaNoPoligonoAnterior) {
     bool left = false, right = false;
     Poligono P = Voro.getPoligono(poligonoAnterior);
     Ponto x1, x2;
+
     for (int j = 0; j < P.getNVertices(); j++) {
         P.getAresta(j, x1, x2);
         Ponto direcao = x2 - x1;
         Ponto pontoAoVerticeInicial = x1 - p;
+
         qtdChamadasProdutoVetorial++;
         Ponto CrossProduct;
         ProdVetorial(direcao, pontoAoVerticeInicial, CrossProduct);
+
         float produtoVetorial = CrossProduct.z;
         if (produtoVetorial > 0)
             right = true;
@@ -401,9 +432,6 @@ int InclusaoPontosPoligonosConcavos(Ponto &p) {
         if (andante.y > MaxPol.y || andante.y < MinPol.y)
             continue;
 
-        if (!incluiPontosPoligonosConcavos && debug)
-            cout << "Pelo algo das faixas, o poligono " << i << " pode conter o ponto" << endl;
-
         int nroInterseccoes = 0;
         Ponto pA, pB;
         for (int j = 0; j < P.getNVertices(); j++)
@@ -424,27 +452,51 @@ int InclusaoPontosPoligonosConcavos(Ponto &p) {
     return qtdChamadasHaInterseccao;
 }
 
-bool VerificaPontoDentroLimites(Ponto &p) {
-    if (p.x > Max.x)
-        p.x = Min.x;
-    else if (p.x < Min.x)
-        p.x = Max.x;
+/**
+Inclusão de pontos em polígonos convexos:  O teste de inclusão deve ser realizado 
+somente com os polígonos cujos envelopes contiverem o ponto.
 
-    if (p.y > Max.y)
-        p.y = Min.y;
-    else if (p.y < Min.y)
-        p.y = Max.y;
+@return quantas vezes a função ProdVetorial foi chamada. 
+*/
+int InclusaoPontosPoligonosConvexos(Ponto &p) {
+    int qtdChamadasProdutoVetorial = 0;
+    bool left, right;
+    Ponto pA, pB;
+    Poligono P;
 
-    bool dentroLimites = true;
-    Ponto Min, Max;
-    Voro.obtemLimites(Min, Max);
+    for (int i = 0; i < Voro.getNPoligonos(); i++) {
+        if (i == poligonoAnterior)
+            continue;
 
-    if (p.x < Min.x || p.x > Max.x)
-        dentroLimites = false;
-    if (p.y < Min.y || p.y > Max.y)
-        dentroLimites = false;
+        P = Voro.getPoligono(i);
+        if (!P.pontoEstaDentro(p))
+            continue;
 
-    return dentroLimites;
+        left = right = false;
+
+        for (int j = 0; j < P.getNVertices(); j++) {
+            P.getAresta(j, pA, pB);
+            Ponto direcao = pB - pA;
+            Ponto pontoAoVerticeInicial = pA - p;
+
+            qtdChamadasProdutoVetorial++;
+            Ponto CrossProduct;
+            ProdVetorial(direcao, pontoAoVerticeInicial, CrossProduct);
+
+            float produtoVetorial = CrossProduct.z;
+            if (produtoVetorial > 0)
+                right = true;
+            else if (produtoVetorial < 0)
+                left = true;
+        }
+        // Se, para todos os lados do polígono, o sinal do produto vetorial for consistente (ou seja, todos positivos ou todos negativos), o ponto está dentro do polígono, e você define inside como verdadeiro.
+        if (right != left) {
+            poligonoAnterior = i;
+            break;
+        }
+    }
+
+    return qtdChamadasProdutoVetorial;
 }
 
 void movePointVertical(Ponto &p, float distance) {
@@ -504,7 +556,9 @@ void movePoint(char key) {
     incluiPontosPoligonosConcavos = true;
 
     // Passo 2: Inclusao de pontos em poligonos convexos
-    cout << "Passo 2: Inclusao de pontos em poligonos convexos" << endl;
+    cout << "\t[SYS]" << "Inclusao de pontos em poligonos convexos..." << endl;
+    qtdChamadasProdutoVetorial = InclusaoPontosPoligonosConvexos(andante);
+    cout << "Chamadas Produto Vetorial (InclusaoPontosPoligonosConvexos): " << qtdChamadasProdutoVetorial << endl;
 
     // Passo 3: Inclusao de pontos em poligonos convexos utilizando a informação de vizinhança
     cout << "Passo 3: Inclusao de pontos em poligonos convexos utilizando a informação de vizinhança" << endl;
@@ -556,10 +610,10 @@ void arrow_keys ( int a_keys, int x, int y )
 	}
 }
 // **********************************************************************
-// Esta fun��o captura o clique do botao direito do mouse sobre a �rea de
+// Esta funcao captura o clique do botao direito do mouse sobre a �rea de
 // desenho e converte a coordenada para o sistema de refer�ncia definido
-// na glOrtho (ver fun��o reshape)
-// Este c�digo � baseado em http://hamala.se/forums/viewtopic.php?t=20
+// na glOrtho (ver funcao reshape)
+// Este codigo e baseado em http://hamala.se/forums/viewtopic.php?t=20
 // **********************************************************************
 void Mouse(int button,int state,int x,int y)
 {
