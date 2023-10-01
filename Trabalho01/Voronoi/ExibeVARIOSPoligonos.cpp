@@ -151,7 +151,7 @@ void init()
     glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 
     cout << "[SYS]" << " Inicializando Diagrama de Voronoi..." << endl;
-    char* nomeArquivo = "casosTeste/5.txt";
+    char* nomeArquivo = "casosTeste/100.txt";
     cout << "[SYS]" << " Lendo poligonos do arquivo " << nomeArquivo << "..." << endl;
     Voro.LePoligonos(nomeArquivo);
     cout << "[SYS]" << " Calculando limites do diagrama Voronoi..." << endl;
@@ -180,7 +180,7 @@ void init()
     cout << "[SYS]" << " Gerando cores dos poligonos..." << endl;
     CoresDosPoligonos = new int[Voro.getNPoligonos()];
     for (int i = 0; i < Voro.getNPoligonos(); i++)
-        CoresDosPoligonos[i] = i * 2;
+        CoresDosPoligonos[i] = i * 5;
     cout << "[SYS]" << " Cores dos poligonos geradas!" << endl;
 
     // Cria pontinho que sera movido
@@ -200,7 +200,7 @@ void init()
         qtdChamadasProdutoVetorial += PassoInicial(andante, inside);
         if (inside)
             break;
-        cout << "\tTestando se o ponto esta dentro de outro poligono..." << endl;
+        cout << "\tTestando se o ponto esta dentro do poligono " << i + 1 << "..." << endl;
     }
     cout << "\tQuantidade de chamadas para ProdVetorial para descobrir o poligono inicial: " << qtdChamadasProdutoVetorial << endl;
     cout << "[SYS]" << " Posicao inicial do ponto computada! ";andante.imprime();cout << endl;
@@ -476,7 +476,7 @@ Inclusao de pontos em polígonos côncavos:  O teste de inclusao deve ser realiz
 
 @return quantas vezes a funcao HaIntersecao foi chamada.
 */
-int InclusaoPontosPoligonosConcavos(Ponto &p, int &poligonoPosMovimento, bool debug = true) {
+int InclusaoPontosPoligonosConcavos(Ponto &p, int &poligonoPosMovimento, bool debug = false) {
     // if (debug)
     //     cout << "[SYS]" << " Fazendo teste de inclusao de pontos em poligonos concavos..." << endl;
 
@@ -618,11 +618,11 @@ int InclusaoPontosPoligonosConvexos(Ponto &p, int &poligonoPosMovimento, Poligon
             cout << "\tComparando com " << i + 1 << "o vizinho" << endl;
 
         Vizinho = P.getVizinho(i);
-        // if (!Vizinho.pontoEstaDentro(p)) {
-        //     if (debug)
-        //         cout << "\tPonto nao esta dentro do envelope do poligono " << i << ", entao nao preciso testar o poligono " << i << endl;
-        //     continue;
-        // }
+        if (!Vizinho.pontoEstaDentro(p)) {
+            if (debug)
+                cout << "\tPonto nao esta dentro do envelope do vizinho " << i + 1 << ", entao nao preciso testar" << endl;
+            continue;
+        }
 
         left = right = false;
 
@@ -767,7 +767,7 @@ void movePonto(char key) {
 
     // Passo 1: Inclusao de pontos em poligonos concavos
     cout << "[SYS] " << "Fazendo teste de inclusao de pontos em poligonos concavos..." << endl;
-    int qtdChamadasHaInterseccao = InclusaoPontosPoligonosConcavos(andante, poligonoPosMovimento);
+    int qtdChamadasHaInterseccao = InclusaoPontosPoligonosConcavos(andante, poligonoPosMovimento, debug);
     incluiPontosPoligonosConcavos = true;
     cout << "\tChamadas HaInterseccao (InclusaoPontosPoligonosConcavos): " << qtdChamadasHaInterseccao << endl;
     cout << "[SYS] " << "Continuando...\n" << endl;
