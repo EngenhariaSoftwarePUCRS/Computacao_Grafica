@@ -67,8 +67,8 @@ Ponto PosicaoAlvo;
 Ponto VetorObservadorAlvo;
 
 void init(void) {
-    glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
-    // Fundo de tela amarelo
+    glClearColor(0.6156862745f, 0.8980392157f, 0.9803921569f, 1.0f);
+    // Fundo de tela azul claro
 
     glClearDepth(1.0);
     glDepthFunc(GL_LESS);
@@ -85,13 +85,12 @@ void init(void) {
     else
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    PosicaoObservador = Ponto(0, 0, 0);
+    PosicaoObservador = Ponto(0, 0, 10);
     PosicaoAlvo = Ponto(0, 0, 0);
     VetorObservadorAlvo = PosicaoAlvo - PosicaoObservador;
 }
 
-void animate()
-{
+void animate() {
     double dt;
     dt = T.getDeltaT();
     AccumDeltaT += dt;
@@ -99,14 +98,12 @@ void animate()
     nFrames++;
 
     // fixa a atualizacao da tela em 30
-    if (AccumDeltaT > 1.0/30)
-    {
+    if (AccumDeltaT > 1.0/30) {
         AccumDeltaT = 0;
         angulo+= 1;
         glutPostRedisplay();
     }
-    if (TempoTotal > 5.0)
-    {
+    if (TempoTotal > 5.0) {
         /*
             cout << "Tempo Acumulado: "  << TempoTotal << " segundos. " ;
             cout << "Nros de Frames sem desenho: " << nFrames << endl;
@@ -158,8 +155,8 @@ void DesenhaCubo(float tamAresta) {
     glEnd();
 
 }
-void DesenhaParalelepipedo()
-{
+
+void DesenhaParalelepipedo() {
     glPushMatrix();
         glTranslatef(0,0,-1);
         glScalef(1,1,2);
@@ -197,6 +194,7 @@ void DesenhaLadrilho(int corBorda, int corDentro) {
         glVertex3f( 0.5f,  0.0f, -0.5f);
     glEnd();
 }
+
 void DesenhaPiso() {
     // Usa uma semente fixa para gerar sempre as mesma cores no piso
     srand(100);
@@ -205,12 +203,30 @@ void DesenhaPiso() {
     for(int x = -20; x < 20; x++) {
         glPushMatrix();
         for(int z = -20; z < 20; z++) {
-            DesenhaLadrilho(MediumGoldenrod, rand()%40);
+            DesenhaLadrilho(MediumGoldenrod, rand() % 40);
             glTranslated(0, 0, 1);
         }
         glPopMatrix();
         glTranslated(1, 0, 0);
     }
+    glPopMatrix();
+}
+
+void DesenhaParedao() {
+    glPushMatrix();
+        glRotatef(90, 0, 0, 1);
+        DesenhaPiso();
+    glPopMatrix();
+}
+
+void DesenhaChao() {
+    glPushMatrix();
+        glTranslated(-20, 0, 0);
+        DesenhaPiso();
+    glPopMatrix();
+    glPushMatrix();
+        glTranslated(20, 0, 0);
+        DesenhaPiso();
     glPopMatrix();
 }
 
@@ -279,10 +295,8 @@ void PosicUser() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(
-        // Posicao do Observador
-        0, 0, 10,
-        // Posicao do Alvo
-        0, 0, 0,
+        PosicaoObservador.x, PosicaoObservador.y, PosicaoObservador.z,
+        PosicaoAlvo.x, PosicaoAlvo.y, PosicaoAlvo.z,
         // Vetor ViewUp
         0.0f, 1.0f, 0.0f
     );
@@ -325,14 +339,16 @@ void display(void) {
 
 	glPushMatrix();
 		glTranslatef(-4.0f, 0.0f, 2.0f);
-		glRotatef(angulo,0,1,0);
+		glRotatef(angulo, 0, 1, 0);
         // Azul claro
 		glColor3f(0.6156862745, 0.8980392157, 0.9803921569);
         glutSolidCube(2);
 		//DesenhaCubo(1);
 	glPopMatrix();
 
-    DesenhaPiso();
+    DesenhaChao();
+
+    DesenhaParedao();
 
 	glutSwapBuffers();
 }
@@ -357,6 +373,7 @@ void keyboard(unsigned char key, int x, int y) {
             break;
   }
 }
+
 void arrow_keys(int a_keys, int x, int y) {
 	switch (a_keys) {
         // When Up Arrow Is Pressed...
