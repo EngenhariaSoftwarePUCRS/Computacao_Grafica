@@ -403,11 +403,11 @@
 1654607284 source:c:\users\felip\desktop\log\github\engenhariasoftwarepucrs\computacao_grafica\3d\programabasico\temporizador.cpp
 	"Temporizador.h"
 
-1654607283 source:c:\users\felip\desktop\log\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\linha.cpp
+1699566523 source:c:\users\felip\desktop\log\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\linha.cpp
 	<cstdlib>
 	"Linha.h"
 
-1654607283 c:\users\felip\desktop\log\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\linha.h
+1699566523 c:\users\felip\desktop\log\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\linha.h
 	<windows.h>
 	<glut.h>
 	<GLUT/glut.h>
@@ -440,12 +440,12 @@
 	<GLUT/glut.h>
 	<glut.h>
 
-1654607284 source:c:\users\felip\desktop\log\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\poligono.cpp
+1699566528 source:c:\users\felip\desktop\log\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\poligono.cpp
 	<iostream>
 	<fstream>
 	"Poligono.h"
 
-1654607284 c:\users\felip\desktop\log\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\poligono.h
+1699566528 c:\users\felip\desktop\log\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\poligono.h
 	<iostream>
 	<windows.h>
 	<glut.h>
@@ -461,7 +461,7 @@
 1654607284 source:c:\users\felip\desktop\log\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\ponto.cpp
 	"Ponto.h"
 
-1699563888 source:c:\users\felip\desktop\log\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\programabasico3d.cpp
+1699566024 source:c:\users\felip\desktop\log\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\programabasico3d.cpp
 	<iostream>
 	<cmath>
 	<ctime>
