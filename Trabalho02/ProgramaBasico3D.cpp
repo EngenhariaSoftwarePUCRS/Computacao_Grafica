@@ -85,8 +85,8 @@ void init(void) {
     else
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    PosicaoObservador = Ponto(0, 0, 10);
-    PosicaoAlvo = Ponto(0, 0, 0);
+    PosicaoObservador = Ponto(-20, 0, 10);
+    PosicaoAlvo = Ponto(0, 0, 10);
     VetorObservadorAlvo = PosicaoAlvo - PosicaoObservador;
 }
 
@@ -336,7 +336,7 @@ void display(void) {
 	glPopMatrix();
 
 	glPushMatrix();
-		glTranslatef(-4.0f, 0.0f, 2.0f);
+		glTranslatef(10.0f, 0.0f, 12.0f);
 		glRotatef(angulo, 0, 1, 0);
         // Azul claro
 		glColor3f(0.6156862745, 0.8980392157, 0.9803921569);
