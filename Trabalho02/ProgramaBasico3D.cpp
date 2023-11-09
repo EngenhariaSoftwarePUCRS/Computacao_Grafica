@@ -174,7 +174,6 @@ void DesenhaParalelepipedo() {
 void DesenhaLadrilho(int corBorda, int corDentro) {
     // Desenha quadrado preenchido
     defineCor(corDentro);
-    glColor3f(1, 1, 1);
     glBegin(GL_QUADS);
         glNormal3f(0,1,0);
         glVertex3f(-0.5f,  0.0f, -0.5f);
@@ -184,7 +183,6 @@ void DesenhaLadrilho(int corBorda, int corDentro) {
     glEnd();
 
     defineCor(corBorda);
-    glColor3f(0,1,0);
 
     glBegin(GL_LINE_STRIP);
         glNormal3f(0,1,0);
@@ -393,7 +391,7 @@ int main(int argc, char** argv) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGB);
 	glutInitWindowPosition(0,0);
-	glutInitWindowSize(700, 700);
+	glutInitWindowSize(1280, 720);
 	glutCreateWindow("Trabalho 2 - Felipe Freitas e Lucas Wolschick - Computacao Grafica - 2023/2 - Prof. Marcio Pinho");
 
 	init();
