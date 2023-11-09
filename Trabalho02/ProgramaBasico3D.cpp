@@ -73,7 +73,7 @@ void init(void) {
     glClearDepth(1.0);
     glDepthFunc(GL_LESS);
     glEnable(GL_DEPTH_TEST);
-    glEnable (GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
     glEnable(GL_NORMALIZE);
     glShadeModel(GL_SMOOTH);
     //glShadeModel(GL_FLAT);
@@ -366,6 +366,11 @@ void keyboard(unsigned char key, int x, int y) {
             init();
             glutPostRedisplay();
             break;
+        // Volta a visualização inicial
+        case 'r':
+            PosicaoAlvo = Ponto(0, 0, 10);
+            PosicaoObservador = Ponto(-20, 0, 10);
+            break;
         default:
             cout << "Tecla " << key << " nao tem funcao definida" << endl;
             break;
@@ -382,9 +387,16 @@ void arrow_keys(int a_keys, int x, int y) {
 	    case GLUT_KEY_DOWN:
 			glutInitWindowSize (700, 500);
 			break;
+        case GLUT_KEY_LEFT:
+            VetorObservadorAlvo.rotacionaY(3.6f);
+            break;
+        case GLUT_KEY_RIGHT:
+            VetorObservadorAlvo.rotacionaY(-3.6f);
+            break;
 		default:
 			break;
 	}
+    PosicaoAlvo = PosicaoObservador + VetorObservadorAlvo;
 }
 
 int main(int argc, char** argv) {
