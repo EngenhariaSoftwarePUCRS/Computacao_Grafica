@@ -65,6 +65,7 @@ Ponto CantoEsquerdo(-20,-1,-10);
 Ponto PosicaoObservador;
 Ponto PosicaoAlvo;
 Ponto VetorObservadorAlvo;
+float velocidadeMovimento;
 
 void init(void) {
     glClearColor(0.6156862745f, 0.8980392157f, 0.9803921569f, 1.0f);
@@ -88,6 +89,7 @@ void init(void) {
     PosicaoObservador = Ponto(-20, 0, 10);
     PosicaoAlvo = Ponto(0, 0, 10);
     VetorObservadorAlvo = PosicaoAlvo - PosicaoObservador;
+    velocidadeMovimento = 0.5f;
 }
 
 void animate() {
@@ -351,6 +353,20 @@ void display(void) {
 	glutSwapBuffers();
 }
 
+void moveObservador(unsigned char key) {
+    // Normaliza o vetor para ter comprimento 1, mantendo apenas a direção
+    VetorObservadorAlvo.versor();
+    Ponto DistanciaPercorrida = VetorObservadorAlvo * velocidadeMovimento;
+    if (key != 'w' && key != 's') {
+        cout << "Tecla " << key << " invalida para movimentacao do observador" << endl;
+        return;
+    }
+    if (key == 's') {
+        DistanciaPercorrida = -DistanciaPercorrida;
+    }
+    PosicaoObservador = PosicaoObservador + DistanciaPercorrida;
+}
+
 void keyboard(unsigned char key, int x, int y) {
 	switch(key) {
         // Termina o programa qdo a tecla ESC for pressionada
@@ -363,13 +379,13 @@ void keyboard(unsigned char key, int x, int y) {
             break;
         case 'e':
             ModoDeExibicao = !ModoDeExibicao;
+        case 'r':
             init();
             glutPostRedisplay();
             break;
-        // Volta a visualização inicial
-        case 'r':
-            PosicaoAlvo = Ponto(0, 0, 10);
-            PosicaoObservador = Ponto(-20, 0, 10);
+        case 'w':
+        case 's':
+            moveObservador(key);
             break;
         default:
             cout << "Tecla " << key << " nao tem funcao definida" << endl;
