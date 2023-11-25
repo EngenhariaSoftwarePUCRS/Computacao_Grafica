@@ -45,7 +45,7 @@ Temporizador T;
 double AccumDeltaT=0;
 
 
-GLfloat AspectRatio, angulo=0;
+GLfloat AspectRatio;
 
 // Controle do modo de projecao
 // 0: Projecao Paralela Ortografica; 1: Projecao Perspectiva
@@ -64,12 +64,15 @@ double TempoTotal = 0;
 int wallHeight;
 int sceneWidth;
 int floorDepth;
+
 Ponto PosicaoObservador;
 Ponto PosicaoAlvo;
 Ponto VetorObservadorAlvo;
 
 Ponto PosicaoBaseCanhao;
+Ponto TamanhoCanhao;
 Ponto PosicaoMiraCanhao;
+Ponto TamanhoMiraCanhao;
 float velocidadeMovimento;
 
 void init(void) {
@@ -94,9 +97,17 @@ void init(void) {
     sceneWidth = 25;
     wallHeight = 15;
     floorDepth = 25;
-    PosicaoObservador = Ponto(6, 0, 3);
-    PosicaoAlvo = Ponto(6, 0, 4);
+
+    PosicaoObservador = Ponto(6, 1, -3);
+    PosicaoAlvo = Ponto(6, 1, 4);
     VetorObservadorAlvo = PosicaoAlvo - PosicaoObservador;
+
+    PosicaoBaseCanhao = Ponto(6, 0, 4);
+    TamanhoCanhao = Ponto(2, 1, 3);
+    PosicaoMiraCanhao = Ponto(PosicaoBaseCanhao.x, PosicaoBaseCanhao.y+0.5, PosicaoBaseCanhao.z*1.5);
+    float two_thirds = 2/float(3);
+    TamanhoMiraCanhao = Ponto(0.5, 0.5, two_thirds*TamanhoCanhao.z);
+
     velocidadeMovimento = 0.5f;
 }
 
@@ -110,7 +121,6 @@ void animate() {
     // fixa a atualizacao da tela em 30
     if (AccumDeltaT > 1.0/30) {
         AccumDeltaT = 0;
-        angulo+= 1;
         glutPostRedisplay();
     }
     if (TempoTotal > 5.0) {
@@ -127,51 +137,62 @@ void animate() {
 void DesenhaCubo(float tamAresta) {
     glBegin(GL_QUADS);
     // Front Face
-    glNormal3f(0,0,1);
+    glNormal3f(0, 0, 1);
     glVertex3f(-tamAresta/2, -tamAresta/2,  tamAresta/2);
     glVertex3f( tamAresta/2, -tamAresta/2,  tamAresta/2);
     glVertex3f( tamAresta/2,  tamAresta/2,  tamAresta/2);
     glVertex3f(-tamAresta/2,  tamAresta/2,  tamAresta/2);
     // Back Face
-    glNormal3f(0,0,-1);
+    glNormal3f(0, 0, -1);
     glVertex3f(-tamAresta/2, -tamAresta/2, -tamAresta/2);
     glVertex3f(-tamAresta/2,  tamAresta/2, -tamAresta/2);
     glVertex3f( tamAresta/2,  tamAresta/2, -tamAresta/2);
     glVertex3f( tamAresta/2, -tamAresta/2, -tamAresta/2);
     // Top Face
-    glNormal3f(0,1,0);
+    glNormal3f(0, 1, 0);
     glVertex3f(-tamAresta/2,  tamAresta/2, -tamAresta/2);
     glVertex3f(-tamAresta/2,  tamAresta/2,  tamAresta/2);
     glVertex3f( tamAresta/2,  tamAresta/2,  tamAresta/2);
     glVertex3f( tamAresta/2,  tamAresta/2, -tamAresta/2);
     // Bottom Face
-    glNormal3f(0,-1,0);
+    glNormal3f(0, -1, 0);
     glVertex3f(-tamAresta/2, -tamAresta/2, -tamAresta/2);
     glVertex3f( tamAresta/2, -tamAresta/2, -tamAresta/2);
     glVertex3f( tamAresta/2, -tamAresta/2,  tamAresta/2);
     glVertex3f(-tamAresta/2, -tamAresta/2,  tamAresta/2);
     // Right face
-    glNormal3f(1,0,0);
+    glNormal3f(1, 0, 0);
     glVertex3f( tamAresta/2, -tamAresta/2, -tamAresta/2);
     glVertex3f( tamAresta/2,  tamAresta/2, -tamAresta/2);
     glVertex3f( tamAresta/2,  tamAresta/2,  tamAresta/2);
     glVertex3f( tamAresta/2, -tamAresta/2,  tamAresta/2);
     // Left Face
-    glNormal3f(-1,0,0);
+    glNormal3f(-1, 0, 0);
     glVertex3f(-tamAresta/2, -tamAresta/2, -tamAresta/2);
     glVertex3f(-tamAresta/2, -tamAresta/2,  tamAresta/2);
     glVertex3f(-tamAresta/2,  tamAresta/2,  tamAresta/2);
     glVertex3f(-tamAresta/2,  tamAresta/2, -tamAresta/2);
     glEnd();
-
 }
 
-void DesenhaParalelepipedo() {
+void DesenhaParalelepipedo(float largura, float altura, float profundidade) {
     glPushMatrix();
-        glTranslatef(0,0,-1);
-        glScalef(1,1,2);
-        glutSolidCube(2);
-        //DesenhaCubo(1);
+        glTranslatef(0, 0, -1);
+        glScalef(largura, altura, profundidade);
+        DesenhaCubo(1);
+    glPopMatrix();
+}
+
+void DesenhaCanhao() {
+    glColor3f(0.0f, 0.0f, 1.0f);
+    glPushMatrix();
+        glTranslatef(PosicaoBaseCanhao.x, PosicaoBaseCanhao.y, PosicaoBaseCanhao.z);
+        DesenhaParalelepipedo(TamanhoCanhao.x, TamanhoCanhao.y, TamanhoCanhao.z);
+    glPopMatrix();
+    glColor3f(1.0f, 0.0f, 0.0f);
+    glPushMatrix();
+        glTranslatef(PosicaoMiraCanhao.x, PosicaoMiraCanhao.y, PosicaoMiraCanhao.z);
+        DesenhaParalelepipedo(TamanhoMiraCanhao.x, TamanhoMiraCanhao.y, TamanhoMiraCanhao.z);
     glPopMatrix();
 }
 
@@ -338,27 +359,11 @@ void display(void) {
 
 	glMatrixMode(GL_MODELVIEW);
 
-	glPushMatrix();
-		glTranslatef(5.0f, 0.0f, 3.0f);
-        glRotatef(angulo,0,1,0);
-        // Vermelho
-		glColor3f(0.5f,0.0f,0.0f);
-        glutSolidCube(2);
-        //DesenhaCubo(1);
-	glPopMatrix();
-
-	glPushMatrix();
-		glTranslatef(10.0f, 0.0f, 12.0f);
-		glRotatef(angulo, 0, 1, 0);
-        // Azul claro
-		glColor3f(0.6156862745, 0.8980392157, 0.9803921569);
-        glutSolidCube(2);
-		//DesenhaCubo(1);
-	glPopMatrix();
-
     DesenhaChao();
 
     DesenhaParedao();
+
+    DesenhaCanhao();
 
 	glutSwapBuffers();
 }
@@ -375,6 +380,28 @@ void moveObservador(unsigned char key) {
         DistanciaPercorrida = -DistanciaPercorrida;
     }
     PosicaoObservador = PosicaoObservador + DistanciaPercorrida;
+}
+
+void moveMiraCanhao(unsigned char key) {
+    /*
+        Os segmentos são conectados por articulações. Cada articulação deve ser controlada por uma tecla distinta, utilizando, por exemplo, a seguinte convenção:
+        A/a - Move articulação 1 no sentido horário/anti-horário
+        B/b - Move articulação 2 no sentido horário/anti-horário
+        O primeiro segmento (conectado na base) deve girar no eixo Y e o segundo deve girar de forma a se inclinarem para a frente do robô, quando a rotação do primeiro segmento estiver em 0 graus.
+    */
+    if (key != 'A' && key != 'a' && key != 'B' && key != 'b') {
+        cout << "Tecla " << key << " invalida para movimentacao da mira do canhao" << endl;
+        return;
+    }
+    if (key == 'A') {
+        PosicaoMiraCanhao.rotacionaY(1);
+    } else if (key == 'a') {
+        PosicaoMiraCanhao.rotacionaY(-1);
+    } else if (key == 'B') {
+        PosicaoMiraCanhao.rotacionaX(1);
+    } else if (key == 'b') {
+        PosicaoMiraCanhao.rotacionaX(-1);
+    }
 }
 
 void keyboard(unsigned char key, int x, int y) {
@@ -396,6 +423,12 @@ void keyboard(unsigned char key, int x, int y) {
         case 'w':
         case 's':
             moveObservador(key);
+            break;
+        case 'A':
+        case 'a':
+        case 'B':
+        case 'b':
+            moveMiraCanhao(key);
             break;
         default:
             cout << "Tecla " << key << " nao tem funcao definida" << endl;
