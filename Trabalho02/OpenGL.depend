@@ -482,3 +482,82 @@
 1654607284 source:c:\users\felip\desktop\log\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\temporizador.cpp
 	"Temporizador.h"
 
+1700874912 source:f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\linha.cpp
+	<cstdlib>
+	"Linha.h"
+
+1700874912 f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\linha.h
+	<windows.h>
+	<glut.h>
+	<GLUT/glut.h>
+
+1700874912 f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\gl\glut.h
+	"freeglut.h"
+
+1700874912 f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\gl\freeglut.h
+	"freeglut_std.h"
+	"freeglut_ext.h"
+
+1700874912 f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\gl\freeglut_std.h
+	<windows.h>
+	<GL/gl.h>
+	<GL/glu.h>
+
+1700874912 f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\gl\freeglut_ext.h
+
+1700874912 source:f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\listadecoresrgb.cpp
+	"ListaDeCoresRGB.h"
+
+1700874912 f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\listadecoresrgb.h
+	<iostream>
+	<cmath>
+	<ctime>
+	<fstream>
+	<windows.h>
+	<glut.h>
+	<sys/time.h>
+	<GLUT/glut.h>
+	<glut.h>
+
+1700874912 source:f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\poligono.cpp
+	<iostream>
+	<fstream>
+	"Poligono.h"
+
+1700874912 f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\poligono.h
+	<iostream>
+	<windows.h>
+	<glut.h>
+	<GLUT/glut.h>
+	<glut.h>
+	"Ponto.h"
+	<vector>
+
+1700874912 f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\ponto.h
+	<iostream>
+	<cmath>
+
+1700874912 source:f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\ponto.cpp
+	"Ponto.h"
+
+1700879908 source:f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\programabasico3d.cpp
+	<iostream>
+	<cmath>
+	<ctime>
+	<windows.h>
+	<glut.h>
+	<sys/time.h>
+	<GLUT/glut.h>
+	<glut.h>
+	"Temporizador.h"
+	"ListaDeCoresRGB.h"
+	"Ponto.h"
+
+1700874912 f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\temporizador.h
+	<iostream>
+	<windows.h>
+	<sys/time.h>
+
+1700874912 source:f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\temporizador.cpp
+	"Temporizador.h"
+

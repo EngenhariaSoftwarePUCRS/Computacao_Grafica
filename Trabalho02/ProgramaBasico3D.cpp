@@ -60,11 +60,16 @@ int ModoDeExibicao = 1;
 
 double nFrames = 0;
 double TempoTotal = 0;
-Ponto CantoEsquerdo(-20,-1,-10);
 
+int wallHeight;
+int sceneWidth;
+int floorDepth;
 Ponto PosicaoObservador;
 Ponto PosicaoAlvo;
 Ponto VetorObservadorAlvo;
+
+Ponto PosicaoBaseCanhao;
+Ponto PosicaoMiraCanhao;
 float velocidadeMovimento;
 
 void init(void) {
@@ -86,8 +91,11 @@ void init(void) {
     else
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    PosicaoObservador = Ponto(-20, 0, 10);
-    PosicaoAlvo = Ponto(0, 0, 10);
+    sceneWidth = 25;
+    wallHeight = 15;
+    floorDepth = 25;
+    PosicaoObservador = Ponto(6, 0, 3);
+    PosicaoAlvo = Ponto(6, 0, 4);
     VetorObservadorAlvo = PosicaoAlvo - PosicaoObservador;
     velocidadeMovimento = 0.5f;
 }
@@ -185,7 +193,6 @@ void DesenhaLadrilho(int corBorda, int corDentro) {
     glEnd();
 
     defineCor(corBorda);
-
     glBegin(GL_LINE_STRIP);
         glNormal3f(0,1,0);
         glVertex3f(-0.5f,  0.0f, -0.5f);
@@ -195,15 +202,12 @@ void DesenhaLadrilho(int corBorda, int corDentro) {
     glEnd();
 }
 
-void DesenhaPiso() {
-    // Usa uma semente fixa para gerar sempre as mesma cores no piso
-    srand(100);
+void DesenhaMalhaLadrilhos(int width, int depth, int innerColor) {
     glPushMatrix();
-    glTranslated(CantoEsquerdo.x, CantoEsquerdo.y, CantoEsquerdo.z);
-    for(int x = -20; x < 20; x++) {
+    for(int x = 0; x < width; x++) {
         glPushMatrix();
-        for(int z = -20; z < 20; z++) {
-            DesenhaLadrilho(MediumGoldenrod, rand() % 40);
+        for(int z = 0; z < depth; z++) {
+            DesenhaLadrilho(MediumGoldenrod, innerColor);
             glTranslated(0, 0, 1);
         }
         glPopMatrix();
@@ -214,19 +218,25 @@ void DesenhaPiso() {
 
 void DesenhaParedao() {
     glPushMatrix();
-        glRotatef(90, 0, 0, 1);
-        DesenhaPiso();
+        glTranslated(0, -1, floorDepth);
+        glRotatef(90, -90, 0, 1);
+        DesenhaMalhaLadrilhos(sceneWidth, wallHeight, DarkBrown);
+    glPopMatrix();
+    glPushMatrix();
+        glTranslated(0, -1, floorDepth);
+        DesenhaMalhaLadrilhos(sceneWidth, 1, DarkBrown);
     glPopMatrix();
 }
 
 void DesenhaChao() {
     glPushMatrix();
-        glTranslated(-20, 0, 0);
-        DesenhaPiso();
+        glTranslated(0, -1, 0);
+        DesenhaMalhaLadrilhos(sceneWidth, floorDepth, BlueViolet);
     glPopMatrix();
     glPushMatrix();
-        glTranslated(20, 0, 0);
-        DesenhaPiso();
+        int behindWallDepth = floorDepth + 1;
+        glTranslated(0, -1, behindWallDepth);
+        DesenhaMalhaLadrilhos(sceneWidth, floorDepth, IndianRed);
     glPopMatrix();
 }
 
