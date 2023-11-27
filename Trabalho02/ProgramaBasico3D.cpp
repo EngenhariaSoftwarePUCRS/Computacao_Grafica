@@ -73,6 +73,7 @@ Ponto PosicaoBaseCanhao;
 Ponto TamanhoCanhao;
 Ponto PosicaoMiraCanhao;
 Ponto TamanhoMiraCanhao;
+Ponto AnguloMiraCanhao;
 float velocidadeMovimento;
 
 void init(void) {
@@ -191,6 +192,15 @@ void DesenhaCanhao() {
     glPopMatrix();
     glColor3f(1.0f, 0.0f, 0.0f);
     glPushMatrix();
+        glTranslatef(PosicaoMiraCanhao.x - TamanhoMiraCanhao.x,
+                    PosicaoMiraCanhao.y - TamanhoMiraCanhao.y,
+                    PosicaoMiraCanhao.z - TamanhoMiraCanhao.z);
+            glRotatef(AnguloMiraCanhao.x, 1, 0, 0);
+            glRotatef(AnguloMiraCanhao.y, 0, 1, 0);
+            glRotatef(AnguloMiraCanhao.z, 0, 0, 1);
+        glTranslatef(-PosicaoMiraCanhao.x + TamanhoMiraCanhao.x,
+                    -PosicaoMiraCanhao.y + TamanhoMiraCanhao.y,
+                    -PosicaoMiraCanhao.z + TamanhoMiraCanhao.z);
         glTranslatef(PosicaoMiraCanhao.x, PosicaoMiraCanhao.y, PosicaoMiraCanhao.z);
         DesenhaParalelepipedo(TamanhoMiraCanhao.x, TamanhoMiraCanhao.y, TamanhoMiraCanhao.z);
     glPopMatrix();
@@ -394,13 +404,15 @@ void moveMiraCanhao(unsigned char key) {
         return;
     }
     if (key == 'A') {
-        PosicaoMiraCanhao.rotacionaY(1);
+        AnguloMiraCanhao.y -= 1.0f;
     } else if (key == 'a') {
-        PosicaoMiraCanhao.rotacionaY(-1);
+        AnguloMiraCanhao.y += 1.0f;
     } else if (key == 'B') {
-        PosicaoMiraCanhao.rotacionaX(1);
+        if (AnguloMiraCanhao.x > -90)
+            AnguloMiraCanhao.x -= 1.0f;
     } else if (key == 'b') {
-        PosicaoMiraCanhao.rotacionaX(-1);
+        if (AnguloMiraCanhao.x < 45)
+            AnguloMiraCanhao.x += 1.0f;
     }
 }
 
