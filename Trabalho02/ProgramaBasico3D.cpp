@@ -61,20 +61,22 @@ int ModoDeExibicao = 1;
 double nFrames = 0;
 double TempoTotal = 0;
 
+// Constants
 int wallHeight;
 int sceneWidth;
 int floorDepth;
 
-Ponto PosicaoObservador;
-Ponto PosicaoAlvo;
-Ponto VetorObservadorAlvo;
-
-Ponto PosicaoBaseCanhao;
+Ponto TamanhoVeiculo;
+float distanciaMovimentoVeiculo;
 Ponto TamanhoCanhao;
-Ponto PosicaoMiraCanhao;
-Ponto TamanhoMiraCanhao;
-Ponto AnguloMiraCanhao;
-float velocidadeMovimento;
+Ponto PosicaoCanhao;
+
+// Variables
+Ponto PosicaoVeiculo;
+Ponto AnguloVeiculo;
+Ponto AnguloCanhao;
+Ponto DirecaoCanhao;
+float forcaCanhao;
 
 void init(void) {
     glClearColor(0.6156862745f, 0.8980392157f, 0.9803921569f, 1.0f);
@@ -99,17 +101,16 @@ void init(void) {
     wallHeight = 15;
     floorDepth = 25;
 
-    PosicaoObservador = Ponto(6, 1, -3);
-    PosicaoAlvo = Ponto(6, 1, 4);
-    VetorObservadorAlvo = PosicaoAlvo - PosicaoObservador;
-
-    PosicaoBaseCanhao = Ponto(6, 0, 4);
-    TamanhoCanhao = Ponto(2, 1, 3);
-    PosicaoMiraCanhao = Ponto(PosicaoBaseCanhao.x, PosicaoBaseCanhao.y+0.5, PosicaoBaseCanhao.z*1.5);
-    float two_thirds = 2/float(3);
-    TamanhoMiraCanhao = Ponto(0.5, 0.5, two_thirds*TamanhoCanhao.z);
-
-    velocidadeMovimento = 0.5f;
+    TamanhoVeiculo = Ponto(2, 1, 3);
+    distanciaMovimentoVeiculo = 1.0f;
+    TamanhoCanhao = Ponto((1/4.0) * TamanhoVeiculo.x,
+                          (1/5.0) * TamanhoVeiculo.y,
+                          (2/3.0) * TamanhoVeiculo.z);
+    PosicaoVeiculo = Ponto(6, 0, 4);
+    AnguloVeiculo = Ponto(0, 0, 0);
+    AnguloCanhao = Ponto(0, 0, 0);
+    DirecaoCanhao = Ponto(1, 0, 0);
+    forcaCanhao = 1.0f;
 }
 
 void animate() {
@@ -184,25 +185,32 @@ void DesenhaParalelepipedo(float largura, float altura, float profundidade) {
     glPopMatrix();
 }
 
-void DesenhaCanhao() {
+void DesenhaVeiculo() {
     glColor3f(0.0f, 0.0f, 1.0f);
     glPushMatrix();
-        glTranslatef(PosicaoBaseCanhao.x, PosicaoBaseCanhao.y, PosicaoBaseCanhao.z);
-        DesenhaParalelepipedo(TamanhoCanhao.x, TamanhoCanhao.y, TamanhoCanhao.z);
+        glTranslatef(PosicaoVeiculo.x, PosicaoVeiculo.y, PosicaoVeiculo.z);
+        DesenhaParalelepipedo(TamanhoVeiculo.x, TamanhoVeiculo.y, TamanhoVeiculo.z);
     glPopMatrix();
+    DesenhaCanhao();
+}
+
+void DesenhaCanhao() {
+    PosicaoCanhao = Ponto(PosicaoVeiculo.x,
+                          PosicaoVeiculo.y+0.5,
+                          PosicaoVeiculo.z+1.0);
     glColor3f(1.0f, 0.0f, 0.0f);
     glPushMatrix();
-        glTranslatef(PosicaoMiraCanhao.x - TamanhoMiraCanhao.x,
-                    PosicaoMiraCanhao.y - TamanhoMiraCanhao.y,
-                    PosicaoMiraCanhao.z - TamanhoMiraCanhao.z);
-            glRotatef(AnguloMiraCanhao.x, 1, 0, 0);
-            glRotatef(AnguloMiraCanhao.y, 0, 1, 0);
-            glRotatef(AnguloMiraCanhao.z, 0, 0, 1);
-        glTranslatef(-PosicaoMiraCanhao.x + TamanhoMiraCanhao.x,
-                    -PosicaoMiraCanhao.y + TamanhoMiraCanhao.y,
-                    -PosicaoMiraCanhao.z + TamanhoMiraCanhao.z);
-        glTranslatef(PosicaoMiraCanhao.x, PosicaoMiraCanhao.y, PosicaoMiraCanhao.z);
-        DesenhaParalelepipedo(TamanhoMiraCanhao.x, TamanhoMiraCanhao.y, TamanhoMiraCanhao.z);
+        glTranslatef(PosicaoCanhao.x - TamanhoCanhao.x,
+                     PosicaoCanhao.y - TamanhoCanhao.y,
+                     PosicaoCanhao.z - TamanhoCanhao.z);
+            glRotatef(AnguloCanhao.x, 1, 0, 0);
+            glRotatef(AnguloCanhao.y, 0, 1, 0);
+            glRotatef(AnguloCanhao.z, 0, 0, 1);
+        glTranslatef(-PosicaoCanhao.x + TamanhoCanhao.x,
+                     -PosicaoCanhao.y + TamanhoCanhao.y,
+                     -PosicaoCanhao.z + TamanhoCanhao.z);
+        glTranslatef(PosicaoCanhao.x, PosicaoCanhao.y, PosicaoCanhao.z);
+        DesenhaParalelepipedo(TamanhoCanhao.x, TamanhoCanhao.y, TamanhoCanhao.z);
     glPopMatrix();
 }
 
@@ -336,8 +344,8 @@ void PosicUser() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(
-        PosicaoObservador.x, PosicaoObservador.y, PosicaoObservador.z,
-        PosicaoAlvo.x, PosicaoAlvo.y, PosicaoAlvo.z,
+        PosicaoVeiculo.x - 1, PosicaoVeiculo.y, PosicaoVeiculo.z,
+        PosicaoVeiculo.x, PosicaoVeiculo.y, PosicaoVeiculo.z,
         // Vetor ViewUp
         0.0f, 1.0f, 0.0f
     );
@@ -373,47 +381,59 @@ void display(void) {
 
     DesenhaParedao();
 
-    DesenhaCanhao();
+    DesenhaVeiculo();
 
 	glutSwapBuffers();
 }
 
-void moveObservador(unsigned char key) {
+void moveVeiculo(unsigned char key) {
     // Normaliza o vetor para ter comprimento 1, mantendo apenas a direção
     VetorObservadorAlvo.versor();
-    Ponto DistanciaPercorrida = VetorObservadorAlvo * velocidadeMovimento;
-    if (key != 'w' && key != 's') {
+    Ponto DistanciaPercorrida = VetorObservadorAlvo * velocidadeMovimentoObservador;
+    if (key != 'W' && key != 'w' && key != 'S' && key != 's') {
         cout << "Tecla " << key << " invalida para movimentacao do observador" << endl;
         return;
     }
-    if (key == 's') {
+    if (key == 'S' || key == 's') {
         DistanciaPercorrida = -DistanciaPercorrida;
     }
     PosicaoObservador = PosicaoObservador + DistanciaPercorrida;
 }
 
-void moveMiraCanhao(unsigned char key) {
-    /*
-        Os segmentos são conectados por articulações. Cada articulação deve ser controlada por uma tecla distinta, utilizando, por exemplo, a seguinte convenção:
-        A/a - Move articulação 1 no sentido horário/anti-horário
-        B/b - Move articulação 2 no sentido horário/anti-horário
-        O primeiro segmento (conectado na base) deve girar no eixo Y e o segundo deve girar de forma a se inclinarem para a frente do robô, quando a rotação do primeiro segmento estiver em 0 graus.
-    */
-    if (key != 'A' && key != 'a' && key != 'B' && key != 'b') {
-        cout << "Tecla " << key << " invalida para movimentacao da mira do canhao" << endl;
+void rotacionaVeiculo(unsigned char key) {
+    if (key != 'a' && key != 'A') {
+        cout << "Tecla " << key << " invalida para rotacao do veiculo" << endl;
         return;
     }
-    if (key == 'A') {
-        AnguloMiraCanhao.y -= 1.0f;
-    } else if (key == 'a') {
-        AnguloMiraCanhao.y += 1.0f;
-    } else if (key == 'B') {
-        if (AnguloMiraCanhao.x > -90)
-            AnguloMiraCanhao.x -= 1.0f;
-    } else if (key == 'b') {
-        if (AnguloMiraCanhao.x < 45)
-            AnguloMiraCanhao.x += 1.0f;
+    if (key == 'a') {
+        AnguloVeiculo.y += 1.0f;
+    } else if (key == 'A') {
+        AnguloVeiculo.y -= 1.0f;
     }
+    Ponto DirecaoCanhao = Ponto(1, 0, 0);
+    DirecaoCanhao.rotacionaZ(AnguloCanhao);
+    DirecaoCanhao.rotacionaY(AnguloVeiculo);
+}
+
+void rotacionaCanhao(unsigned char key) {
+    if (key != 'b' && key != 'B') {
+        cout << "Tecla " << key << " invalida para movimentacao da  do canhao" << endl;
+        return;
+    }
+    if (AnguloVeiculo.y != 0) {
+        cout << "Veiculo deve estar alinhado com o eixo Z para rotacionar o canhao" << endl;
+        return;
+    }
+    if (key == 'b') {
+        if (AnguloCanhao.x < 45)
+            AnguloCanhao.x += 2.0f;
+    } else if (key == 'B') {
+        if (AnguloCanhao.x > -90)
+            AnguloCanhao.x -= 2.0f;
+    }
+    DirecaoCanhao = Ponto(1, 0, 0);
+    DirecaoCanhao.rotacionaZ(AnguloCanhao);
+    DirecaoCanhao.rotacionaY(AnguloVeiculo);
 }
 
 void keyboard(unsigned char key, int x, int y) {
@@ -424,28 +444,41 @@ void keyboard(unsigned char key, int x, int y) {
             break;
         case 'p':
             ModoDeProjecao = !ModoDeProjecao;
-            glutPostRedisplay();
             break;
         case 'e':
             ModoDeExibicao = !ModoDeExibicao;
+            break;
         case 'r':
             init();
-            glutPostRedisplay();
             break;
         case 'w':
+        case 'W':
         case 's':
-            moveObservador(key);
+        case 'S':
+            moveVeiculo(key);
             break;
-        case 'A':
         case 'a':
-        case 'B':
+        case 'A':
+            rotacionaVeiculo(key);
+            break;
         case 'b':
-            moveMiraCanhao(key);
+        case 'B':
+            rotacionaCanhao(key);
+            break;
+        case 'c':
+            forcaCanhao += 0.5f;
+            break;
+        case 'C':
+            forcaCanhao -= 0.5f;
+            break;
+        case ' ':
+            cout << "Tiro" << endl;
             break;
         default:
             cout << "Tecla " << key << " nao tem funcao definida" << endl;
             break;
-  }
+    }
+    glutPostRedisplay();
 }
 
 void arrow_keys(int a_keys, int x, int y) {
@@ -456,7 +489,7 @@ void arrow_keys(int a_keys, int x, int y) {
 			break;
         // When Down Arrow Is Pressed...
 	    case GLUT_KEY_DOWN:
-			glutInitWindowSize (700, 500);
+			glutInitWindowSize(1280, 720);
 			break;
         case GLUT_KEY_LEFT:
             VetorObservadorAlvo.rotacionaY(3.6f);
@@ -467,7 +500,7 @@ void arrow_keys(int a_keys, int x, int y) {
 		default:
 			break;
 	}
-    PosicaoAlvo = PosicaoObservador + VetorObservadorAlvo;
+    PosicaoAlvoObservador = PosicaoObservador + VetorObservadorAlvo;
 }
 
 int main(int argc, char** argv) {
