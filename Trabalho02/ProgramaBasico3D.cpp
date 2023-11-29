@@ -47,11 +47,6 @@ double AccumDeltaT=0;
 
 GLfloat AspectRatio;
 
-// Controle do modo de projecao
-// 0: Projecao Paralela Ortografica; 1: Projecao Perspectiva
-// A funcao "PosicUser" utiliza esta variavel. O valor dela e alterado pela tecla 'p'
-int ModoDeProjecao = 1;
-
 
 // Controle do modo de projecao
 // 0: Wireframe; 1: Faces preenchidas
@@ -321,6 +316,10 @@ void init(void) {
     // glShadeModel(GL_FLAT);
 
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+    if (ModoDeExibicao)
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    else
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     sideView = true;
 
@@ -372,12 +371,8 @@ void PosicUser() {
     // Define os parametros da projecao Perspectiva
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    // Define o volume de visualizacao sempre a partir da posicao do observador
-    if (ModoDeProjecao == 0)
-        // Projecao paralela Orthografica
-        glOrtho(-10, 10, -10, 10, 0, 7);
     // Projecao perspectiva
-    else MygluPerspective(90,AspectRatio,0.01,50);
+    MygluPerspective(90, AspectRatio, 0.01, 50);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -419,6 +414,11 @@ void keyboard(unsigned char key, int x, int y) {
         // Termina o programa qdo a tecla ESC for pressionada
         case 27:
             exit(0);
+            break;
+        case 'e':
+            ModoDeExibicao = !ModoDeExibicao;
+            init();
+            glutPostRedisplay();
             break;
         case 'p':
             sideView = !sideView;
