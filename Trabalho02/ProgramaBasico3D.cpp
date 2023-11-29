@@ -22,7 +22,6 @@
 
 using namespace std;
 
-
 #ifdef WIN32
 #include <windows.h>
 #include <glut.h>
@@ -38,6 +37,8 @@ using namespace std;
 #include <glut.h>
 #endif
 
+#include "SOIL/SOIL.h"
+#include "ImageClass.h"
 #include "Temporizador.h"
 #include "ListaDeCoresRGB.h"
 #include "Ponto.h"
@@ -46,6 +47,8 @@ double AccumDeltaT=0;
 
 
 GLfloat AspectRatio;
+GLuint texturaPiso, texturaParedao, texturaVeiculo, texturaCanhao;
+bool showTexture = true;
 
 
 // Controle do modo de projecao
@@ -59,7 +62,7 @@ double TempoTotal = 0;
 // Prototipos
 void DesenhaChao();
 void DesenhaParedao();
-void DesenhaLadrilho(int corBorda, int corDentro);
+void DesenhaLadrilho();
 void DesenhaParalelepipedo(float largura, float altura, float profundidade);
 void DesenhaVeiculo();
 void moveVeiculo(unsigned char key);
@@ -68,6 +71,7 @@ void rotacionaCanhao(unsigned char key);
 void atiraProjetil();
 Ponto CalculaBezier3(Ponto PC[], double t);
 void DesenhaProjetil();
+GLuint LoadTexture(const char *nomeTextura);
 void init(void);
 void display(void);
 void PosicUser();
@@ -108,22 +112,35 @@ bool sideView;
 
 void DesenhaChao() {
     glPushMatrix();
+        if (showTexture) {
+            glPushMatrix();
+                glBindTexture(GL_TEXTURE_2D, texturaPiso);
+        } else {
+            defineCor(DarkGreen);
+        }
         glTranslated(0, -1, 0);
         for (int x = 0; x < sceneWidth; x++) {
             glPushMatrix();
             for (int z = 0; z < sceneDepth; z++) {
-                float color = z < sceneDepth / 2 ? BlueViolet : IndianRed;
-                DesenhaLadrilho(MediumGoldenrod, color);
+                DesenhaLadrilho();
                 glTranslated(0, 0, 1);
             }
             glPopMatrix();
             glTranslated(1, 0, 0);
         }
+        if (showTexture)
+            glPopMatrix();
     glPopMatrix();
 }
 
 void DesenhaParedao() {
     glPushMatrix();
+        if (showTexture) {
+            glPushMatrix();
+                glBindTexture(GL_TEXTURE_2D, texturaParedao);
+        } else {
+            defineCor(DarkBrown);
+        }
         glTranslated(PosicaoParedao.x, PosicaoParedao.y, PosicaoParedao.z);
         glRotatef(-90, 1, 0, 0);
         glPushMatrix();
@@ -131,37 +148,49 @@ void DesenhaParedao() {
                 glPushMatrix();
                     for (int z = 0; z < wallHeight; z++) {
                         if (wallGrid[x][z])
-                            DesenhaLadrilho(MediumGoldenrod, DarkBrown);
+                            DesenhaLadrilho();
                         glTranslated(0, 0, 1);
                     }
                 glPopMatrix();
                 glTranslated(1, 0, 0);
             }
         glPopMatrix();
+        if (showTexture)
+            glPopMatrix();
     glPopMatrix();
     glPushMatrix();
+        if (showTexture) {
+            glPushMatrix();
+                glBindTexture(GL_TEXTURE_2D, texturaPiso);
+        } else {
+            defineCor(DarkBrown);
+        }
         glTranslated(PosicaoParedao.x, PosicaoParedao.y, PosicaoParedao.z);
         glPushMatrix();
             for (int x = 0; x < sceneWidth; x++) {
-                DesenhaLadrilho(MediumGoldenrod, DarkBrown);
+                DesenhaLadrilho();
                 glTranslated(1, 0, 0);
             }
         glPopMatrix();
+        if (showTexture)
+            glPopMatrix();
     glPopMatrix();
 }
 
-void DesenhaLadrilho(int corBorda, int corDentro) {
+void DesenhaLadrilho() {
     // Desenha quadrado preenchido
-    defineCor(corDentro);
     glBegin(GL_QUADS);
         glNormal3f(0,1,0);
-        glVertex3f(-0.5f,  0.0f, -0.5f);
-        glVertex3f(-0.5f,  0.0f,  0.5f);
-        glVertex3f( 0.5f,  0.0f,  0.5f);
-        glVertex3f( 0.5f,  0.0f, -0.5f);
+        glVertex3f(-0.5f, 0.0f, -0.5f);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex3f(-0.5f, 0.0f, 0.5f);
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex3f(0.5f, 0.0f, 0.5f);
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex3f(0.5f, 0.0f, -0.5f);
     glEnd();
 
-    defineCor(corBorda);
+    defineCor(MediumGoldenrod);
     glBegin(GL_LINE_STRIP);
         glNormal3f(0,1,0);
         glVertex3f(-0.5f,  0.0f, -0.5f);
@@ -175,7 +204,75 @@ void DesenhaParalelepipedo(float largura, float altura, float profundidade) {
     glPushMatrix();
         glTranslatef(0, 0, 0);
         glScalef(largura, altura, profundidade);
-        glutSolidCube(1);
+        // glutSolidCube(1);
+        float tamAresta = 1.0f;
+        glBegin(GL_QUADS);
+            // Front Face
+            glNormal3f(0, 0, 1);
+            glTexCoord2f(0.5f, 0.0f);
+            glVertex3f(-tamAresta / 2, -tamAresta / 2, tamAresta / 2);
+            glTexCoord2f(1.0f, 0.0f);
+            glVertex3f(tamAresta / 2, -tamAresta / 2, tamAresta / 2);
+            glTexCoord2f(1.0f, 0.5f);
+            glVertex3f(tamAresta / 2, tamAresta / 2, tamAresta / 2);
+            glTexCoord2f(0.5f, 0.5);
+            glVertex3f(-tamAresta / 2, tamAresta / 2, tamAresta / 2);
+
+            // Back Face
+            glNormal3f(0, 0, -1);
+            glTexCoord2f(1.0f, 0.0f);
+            glVertex3f(-tamAresta / 2, -tamAresta / 2, -tamAresta / 2);
+            glTexCoord2f(1.0f, 1.0f);
+            glVertex3f(-tamAresta / 2, tamAresta / 2, -tamAresta / 2);
+            glTexCoord2f(0.0f, 1.0f);
+            glVertex3f(tamAresta / 2, tamAresta / 2, -tamAresta / 2);
+            glTexCoord2f(0.0f, 0.0f);
+            glVertex3f(tamAresta / 2, -tamAresta / 2, -tamAresta / 2);
+
+            // Top Face
+            glNormal3f(0, 1, 0);
+            glTexCoord2f(0.0f, 1.0f);
+            glVertex3f(-tamAresta / 2, tamAresta / 2, -tamAresta / 2);
+            glTexCoord2f(0.0f, 0.0f);
+            glVertex3f(-tamAresta / 2, tamAresta / 2, tamAresta / 2);
+            glTexCoord2f(1.0f, 0.0f);
+            glVertex3f(tamAresta / 2, tamAresta / 2, tamAresta / 2);
+            glTexCoord2f(1.0f, 1.0f);
+            glVertex3f(tamAresta / 2, tamAresta / 2, -tamAresta / 2);
+
+            // Bottom Face
+            glNormal3f(0, -1, 0);
+            glTexCoord2f(1.0f, 1.0f);
+            glVertex3f(-tamAresta / 2, -tamAresta / 2, -tamAresta / 2);
+            glTexCoord2f(0.0f, 1.0f);
+            glVertex3f(tamAresta / 2, -tamAresta / 2, -tamAresta / 2);
+            glTexCoord2f(0.0f, 0.0f);
+            glVertex3f(tamAresta / 2, -tamAresta / 2, tamAresta / 2);
+            glTexCoord2f(1.0f, 0.0f);
+            glVertex3f(-tamAresta / 2, -tamAresta / 2, tamAresta / 2);
+
+            // Right face
+            glNormal3f(1, 0, 0);
+            glTexCoord2f(1.0f, 0.0f);
+            glVertex3f(tamAresta / 2, -tamAresta / 2, -tamAresta / 2);
+            glTexCoord2f(1.0f, 1.0f);
+            glVertex3f(tamAresta / 2, tamAresta / 2, -tamAresta / 2);
+            glTexCoord2f(0.0f, 1.0f);
+            glVertex3f(tamAresta / 2, tamAresta / 2, tamAresta / 2);
+            glTexCoord2f(0.0f, 0.0f);
+            glVertex3f(tamAresta / 2, -tamAresta / 2, tamAresta / 2);
+
+            // Left Face
+            glNormal3f(-1, 0, 0);
+            glTexCoord2f(0.0f, 0.0f);
+            glVertex3f(-tamAresta / 2, -tamAresta / 2, -tamAresta / 2);
+            glTexCoord2f(1.0f, 0.0f);
+            glVertex3f(-tamAresta / 2, -tamAresta / 2, tamAresta / 2);
+            glTexCoord2f(1.0f, 1.0f);
+            glVertex3f(-tamAresta / 2, tamAresta / 2, tamAresta / 2);
+            glTexCoord2f(0.0f, 1.0f);
+            glVertex3f(-tamAresta / 2, tamAresta / 2, -tamAresta / 2);
+        glEnd();
     glPopMatrix();
 }
 
@@ -184,14 +281,28 @@ void DesenhaVeiculo() {
         // Base 
         glTranslatef(PosicaoVeiculo.x, PosicaoVeiculo.y, PosicaoVeiculo.z);
         glRotatef(AnguloVeiculo.y, 0, 1, 0);
-        glColor3f(0.4f, 1.0f, 0.2f);
+        if (showTexture) {
+            glPushMatrix();
+                glBindTexture(GL_TEXTURE_2D, texturaVeiculo);
+        } else {
+            glColor3f(0.4f, 1.0f, 0.2f);
+        }
         DesenhaParalelepipedo(TamanhoVeiculo.x, TamanhoVeiculo.y, TamanhoVeiculo.z);
+        if (showTexture)
+            glPopMatrix();
         
         // Canhão
         glTranslatef(PosicaoRelativaCanhao.x, PosicaoRelativaCanhao.y, PosicaoRelativaCanhao.z);
         glRotatef(AnguloCanhao.x, 1, 0, 0);
-        glColor3f(1.0f, 0.2f, 0.1f);
+        if (showTexture) {
+            glPushMatrix();
+                glBindTexture(GL_TEXTURE_2D, texturaCanhao);
+        } else {
+            glColor3f(1.0f, 0.2f, 0.1f);
+        }
         DesenhaParalelepipedo(TamanhoCanhao.x, TamanhoCanhao.y, TamanhoCanhao.z);
+        if (showTexture)
+            glPopMatrix();
     glPopMatrix();
 }
 
@@ -303,6 +414,72 @@ void DesenhaProjetil() {
     }
 }
 
+GLuint LoadTexture(const char *nomeTextura) {
+    GLenum errorCode;
+    GLuint IdTEX;
+    // Habilita o uso de textura
+    glEnable(GL_TEXTURE_2D);
+
+    // Define a forma de armazenamento dos pixels na textura (1= alihamento por byte)
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    // Gera um identificar para a textura
+    glGenTextures(1, &IdTEX); //  vetor que guardas os numeros das texturas
+    errorCode = glGetError();
+    if (errorCode == GL_INVALID_OPERATION) {
+        cout << "Erro: glGenTextures chamada entre glBegin/glEnd." << endl;
+        return -1;
+    }
+
+    // Define que tipo de textura sera usada
+    // GL_TEXTURE_2D ==> define que sera usada uma textura 2D (bitmaps)
+    // texture_id[OBJETO_ESQUERDA]  ==> define o numero da textura
+    glBindTexture(GL_TEXTURE_2D, IdTEX);
+
+    // Carrega a imagem
+    ImageClass Img;
+
+    int r = Img.Load(nomeTextura);
+    if (!r) {
+        cout << "Erro lendo imagem " << nomeTextura << endl;
+        exit(1);
+    }
+
+    int level = 0;
+    int border = 0;
+
+    // Envia a textura para OpenGL, usando o formato apropriado
+    int formato;
+    formato = GL_RGB;
+    if (Img.Channels() == 4)
+        formato = GL_RGBA;
+
+    glTexImage2D(GL_TEXTURE_2D, level, formato,
+                 Img.SizeX(), Img.SizeY(),
+                 border, formato,
+                 GL_UNSIGNED_BYTE, Img.GetImagePtr());
+    
+    errorCode = glGetError();
+    if (errorCode == GL_INVALID_OPERATION) {
+        cout << "Erro: glTexImage2D chamada entre glBegin/glEnd." << endl;
+        return -1;
+    }
+
+    if (errorCode != GL_NO_ERROR) {
+        cout << "Houve algum erro na criacao da textura." << endl;
+        return -1;
+    }
+
+    // Ajusta os filtros iniciais para a textura
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    Img.Delete();
+
+    cout << "Carga de textura OK." << endl;
+    return IdTEX;
+}
+
 void init(void) {
     // Fundo de tela azul claro
     glClearColor(0.6156862745f, 0.8980392157f, 0.9803921569f, 1.0f);
@@ -316,10 +493,15 @@ void init(void) {
     // glShadeModel(GL_FLAT);
 
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-    if (ModoDeExibicao)
+    if (ModoDeExibicao) {
+        texturaPiso = LoadTexture("assets/chaograma.jpg");
+        texturaParedao = LoadTexture("assets/paredePedra.jpg");
+        texturaVeiculo = LoadTexture("assets/camuflado.jpg");
+        texturaCanhao = LoadTexture("assets/metal.jpg");
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    else
+    } else {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
 
     sideView = true;
 
@@ -422,6 +604,9 @@ void keyboard(unsigned char key, int x, int y) {
             break;
         case 'p':
             sideView = !sideView;
+            break;
+        case 't':
+            showTexture = !showTexture;
             break;
         case 'r':
             init();
