@@ -71,9 +71,8 @@ void moveVeiculo(unsigned char key);
 void rotacionaVeiculo(unsigned char key);
 void rotacionaCanhao(unsigned char key);
 void atiraProjetil();
-void TracaPontosDeControle(Ponto PC[]);
 Ponto CalculaBezier3(Ponto PC[], double t);
-void TracaBezier3Pontos();
+void DesenhaProjetil();
 void init(void);
 void display(void);
 void PosicUser();
@@ -92,6 +91,7 @@ const int sceneDepth = 50;
 Ponto PosicaoParedao;
 bool wallGrid[sceneWidth][wallHeight];
 
+Ponto PosicaoRelativaCamera;
 Ponto TamanhoVeiculo;
 float distanciaMovimentoVeiculo;
 Ponto TamanhoCanhao;
@@ -106,6 +106,10 @@ Ponto DirecaoCanhao;
 float forcaCanhao;
 
 Ponto PontosBezier[3];
+bool isShooting;
+float deslocamentoProjetil;
+
+bool sideView;
 
 void DesenhaChao() {
     glPushMatrix();
@@ -198,14 +202,16 @@ void DesenhaVeiculo() {
 
 void moveVeiculo(unsigned char key) {
     // Normaliza o vetor para ter comprimento 1, mantendo apenas a direção
-    DirecaoVeiculo.versor();
-    Ponto DistanciaPercorrida = DirecaoVeiculo * distanciaMovimentoVeiculo;
-    if (key != 'W' && key != 'w' && key != 'S' && key != 's') {
+    float modDirecao = DirecaoVeiculo.modulo();
+    Ponto Direcao = Ponto(
+        DirecaoVeiculo.x / modDirecao,
+        DirecaoVeiculo.y / modDirecao,
+        DirecaoVeiculo.z / modDirecao
+    );
+    Ponto DistanciaPercorrida = Direcao * distanciaMovimentoVeiculo;
+    if (key != 'W' && key != 'w') {
         cout << "Tecla " << key << " invalida para movimentacao do veículo" << endl;
         return;
-    }
-    if (key == 'S' || key == 's') {
-        DistanciaPercorrida = -DistanciaPercorrida;
     }
     Ponto NovaPosicao = PosicaoVeiculo + DistanciaPercorrida;
     if (NovaPosicao.x < 0 || NovaPosicao.x > sceneWidth) {
@@ -259,29 +265,14 @@ void atiraProjetil() {
     Ponto DirecaoProjetil = PosicaoRelativaCanhao + DirecaoCanhao * forcaCanhao;
     float Distancia = 2 * forcaCanhao * cos(AnguloCanhao.x * M_PI / 180);
     // No material de apoio, "C"
-    Ponto Alvo = PosicaoCanhao + Ponto(0, 0, Distancia);
-
+    Ponto Alvo = PosicaoCanhao + Ponto(0, PosicaoCanhao.y - 5, Distancia);
+    Alvo.rotacionaY(AnguloVeiculo.y);
+ 
     PontosBezier[0] = PosicaoCanhao;
     PontosBezier[1] = PosicaoCanhao + DirecaoProjetil * 0.5;
     PontosBezier[2] = Alvo;
-    
-    PontosBezier[0].imprime("P0 - PosicaoCanhao", "\n");
-    PontosBezier[1].imprime("P1 - DirecaoProjetil", "\n");
-    PontosBezier[2].imprime("P2 - Alvo", "\n");
-    glLineWidth(1);
-    defineCor(VioletRed);
-    TracaBezier3Pontos();
-    defineCor(MandarinOrange);
-    TracaPontosDeControle(PontosBezier);
-}
 
-void TracaPontosDeControle(Ponto PC[]) {
-    glPointSize(10);
-    glBegin(GL_POINTS);
-        glVertex3f(PC[0].x, PC[0].y, PC[0].z);
-        glVertex3f(PC[1].x, PC[1].y, PC[1].z);
-        glVertex3f(PC[2].x, PC[2].y, PC[2].z);
-    glEnd();
+    deslocamentoProjetil = 0.0f;
 }
 
 Ponto CalculaBezier3(Ponto PC[], double t) {
@@ -289,29 +280,37 @@ Ponto CalculaBezier3(Ponto PC[], double t) {
     return PC[0] * UmMenosT * UmMenosT + PC[1] * 2 * UmMenosT * t + PC[2] * t * t;
 }
 
-void TracaBezier3Pontos() {
-    double t=0.0;
-    double DeltaT = 1.0/50;
-    Ponto P;
-    cout << "DeltaT: " << DeltaT << endl;
-    glBegin(GL_LINE_STRIP);
-    
-    cout << "Pontos da curva de Bezier" << endl;
-    P.imprime("Ponto inicial", "\n");
-    while (t < 1.0) {
-        P = CalculaBezier3(PontosBezier, t);
-        glVertex2f(P.x, P.y);
-        t += DeltaT;
+void DesenhaProjetil() {
+    double DeltaT = 1.0 / 50;
+    while (deslocamentoProjetil < 1.0) {
+        Ponto P = CalculaBezier3(PontosBezier, deslocamentoProjetil);
+
+        // TODO: Verificar colisões (parede, inimigos, chão)
+        // Se não colidiu em nada, continua o movimento
+
+        cout << "Deslocamento: " << deslocamentoProjetil << endl;
+        P.imprime("Sou um ponto", "\n");
+        glPushMatrix();
+            glColor3f(0.0f, 0.0f, 0.0f);
+            glTranslated(P.x, P.y, P.z);
+            glutSolidSphere(TamanhoCanhao.x * 0.8, 20, 20);
+        glPopMatrix();
+        deslocamentoProjetil += DeltaT;
     }
-    P = CalculaBezier3(PontosBezier, 1.0); // faz o acabamento da curva
-    glVertex2f(P.x, P.y);
-    
-    glEnd();
+    // Desenha pontos de controle
+    float colors[3] = {OrangeRed, GreenYellow, SkyBlue};
+    for (int i = 0; i < 3; i++) {
+        glPushMatrix();
+            defineCor(colors[i]);
+            glTranslated(PontosBezier[i].x, PontosBezier[i].y, PontosBezier[i].z);
+            glutSolidSphere(TamanhoCanhao.x * 0.8, 20, 20);
+        glPopMatrix();
+    }
 }
 
 void init(void) {
-    glClearColor(0.6156862745f, 0.8980392157f, 0.9803921569f, 1.0f);
     // Fundo de tela azul claro
+    glClearColor(0.6156862745f, 0.8980392157f, 0.9803921569f, 1.0f);
 
     glClearDepth(1.0);
     glDepthFunc(GL_LESS);
@@ -322,11 +321,8 @@ void init(void) {
     // glShadeModel(GL_FLAT);
 
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-    // Faces Preenchidas??
-    if (ModoDeExibicao)
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    else
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    sideView = true;
 
     // Reset wall grid
     PosicaoParedao = Ponto(0, -1, sceneDepth / 2);
@@ -334,6 +330,7 @@ void init(void) {
         for (int j = 0; j < wallHeight; j++)
             wallGrid[i][j] = true;
 
+    PosicaoRelativaCamera = Ponto(0, 2, -5);
     TamanhoVeiculo = Ponto(2, 1, 3);
     distanciaMovimentoVeiculo = 1.0f;
     // TamanhoCanhao = Ponto((1/4.0) * TamanhoVeiculo.x,
@@ -346,7 +343,9 @@ void init(void) {
     PosicaoRelativaCanhao = Ponto(0, 0.5, 1);
     AnguloCanhao = Ponto(0, 0, 0);
     DirecaoCanhao = Ponto(0, 0, 1);
-    forcaCanhao = 1.0f;
+    forcaCanhao = 5.0f;
+    isShooting = false;
+    deslocamentoProjetil = 1.0f;
 }
 
 void display(void) {
@@ -363,6 +362,8 @@ void display(void) {
     DesenhaParedao();
 
     DesenhaVeiculo();
+
+    DesenhaProjetil();
 
 	glutSwapBuffers();
 }
@@ -383,12 +384,34 @@ void PosicUser() {
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(
-        PosicaoVeiculo.x - 5, PosicaoVeiculo.y + 1, PosicaoVeiculo.z,
-        PosicaoVeiculo.x, PosicaoVeiculo.y, PosicaoVeiculo.z,
-        // Vetor ViewUp
-        0.0f, 1.0f, 0.0f
-    );
+    if (sideView) {
+        float xObservador = -sceneWidth / 2.0;
+        float yObservador = wallHeight * 2/5.0;
+        float zObservador = sceneDepth / 2.0;
+        float xTarget = sceneWidth;
+        float yTarget = 0;
+        float zTarget = sceneDepth / 2.0;
+        gluLookAt(
+            // Posicao da camera
+            xObservador, yObservador, zObservador,
+            // Posicao do alvo
+            xTarget, yTarget, zTarget,
+            // Vetor ViewUp
+            0.0f, 1.0f, 0.0f
+        );
+    } else {
+        float xObservador = PosicaoVeiculo.x + PosicaoRelativaCamera.x;
+        float yObservador = PosicaoVeiculo.y + PosicaoRelativaCamera.y;
+        float zObservador = PosicaoVeiculo.z + PosicaoRelativaCamera.z;
+        gluLookAt(
+            // Posicao da camera
+            xObservador, yObservador, zObservador,
+            // Posicao do alvo
+            PosicaoVeiculo.x, PosicaoVeiculo.y, PosicaoVeiculo.z,
+            // Vetor ViewUp
+            0.0f, 1.0f, 0.0f
+        );
+    }
 }
 
 void keyboard(unsigned char key, int x, int y) {
@@ -398,18 +421,13 @@ void keyboard(unsigned char key, int x, int y) {
             exit(0);
             break;
         case 'p':
-            ModoDeProjecao = !ModoDeProjecao;
-            break;
-        case 'e':
-            ModoDeExibicao = !ModoDeExibicao;
+            sideView = !sideView;
             break;
         case 'r':
             init();
             break;
         case 'w':
         case 'W':
-        case 's':
-        case 'S':
             moveVeiculo(key);
             break;
         case 'a':
@@ -427,7 +445,13 @@ void keyboard(unsigned char key, int x, int y) {
             forcaCanhao -= 0.5f;
             break;
         case ' ':
-            atiraProjetil();
+            if (isShooting)
+                cout << "Ja existe um projetil em movimento" << endl;
+            else {
+                isShooting = true;
+                atiraProjetil();
+                isShooting = false;
+            }
             break;
         default:
             cout << "Tecla " << key << " nao tem funcao definida" << endl;
