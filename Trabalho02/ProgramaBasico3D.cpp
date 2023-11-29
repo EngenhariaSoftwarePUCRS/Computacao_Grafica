@@ -72,7 +72,7 @@ bool wallGrid[sceneWidth][wallHeight];
 Ponto TamanhoVeiculo;
 float distanciaMovimentoVeiculo;
 Ponto TamanhoCanhao;
-Ponto PosicaoCanhao;
+Ponto PosicaoRelativaCanhao;
 
 // Variables
 Ponto PosicaoVeiculo;
@@ -116,6 +116,7 @@ void init(void) {
     PosicaoVeiculo = Ponto(6, 0, 4);
     AnguloVeiculo = Ponto(0, 0, 0);
     DirecaoVeiculo = Ponto(0, 0, 1);
+    PosicaoRelativaCanhao = Ponto(0, 0.5, 1);
     AnguloCanhao = Ponto(0, 0, 0);
     DirecaoCanhao = Ponto(0, 0, 1);
     forcaCanhao = 1.0f;
@@ -202,7 +203,7 @@ void DesenhaVeiculo() {
         DesenhaParalelepipedo(TamanhoVeiculo.x, TamanhoVeiculo.y, TamanhoVeiculo.z);
         
         // Canhão
-        glTranslatef(0, 0.5, 1);
+        glTranslatef(PosicaoRelativaCanhao.x, PosicaoRelativaCanhao.y, PosicaoRelativaCanhao.z);
         glRotatef(AnguloCanhao.x, 1, 0, 0);
         glColor3f(1.0f, 0.2f, 0.1f);
         DesenhaParalelepipedo(TamanhoCanhao.x, TamanhoCanhao.y, TamanhoCanhao.z);
@@ -399,7 +400,6 @@ void moveVeiculo(unsigned char key) {
         DistanciaPercorrida = -DistanciaPercorrida;
     }
     Ponto NovaPosicao = PosicaoVeiculo + DistanciaPercorrida;
-    NovaPosicao.imprime("Eae", "\n");
     if (NovaPosicao.x < 0 || NovaPosicao.x > sceneWidth) {
         cout << "Movimento invalido, veiculo nao pode sair da pista" << endl;
         return;
@@ -409,12 +409,6 @@ void moveVeiculo(unsigned char key) {
         return;
     }
     PosicaoVeiculo = NovaPosicao;
-}
-
-void corrigeDirecaoCanhao() {
-    Ponto DirecaoDoCanhao = Ponto(1, 0, 0);
-    DirecaoDoCanhao.rotacionaZ(AnguloCanhao.z);
-    DirecaoDoCanhao.rotacionaY(AnguloVeiculo.y);
 }
 
 void rotacionaVeiculo(unsigned char key) {
@@ -428,7 +422,6 @@ void rotacionaVeiculo(unsigned char key) {
         AnguloVeiculo.y += 1.0f;
     }
     DirecaoVeiculo.rotacionaY(AnguloVeiculo.y);
-    corrigeDirecaoCanhao();
 }
 
 void rotacionaCanhao(unsigned char key) {
@@ -447,7 +440,18 @@ void rotacionaCanhao(unsigned char key) {
         if (AnguloCanhao.x < 45)
             AnguloCanhao.x += 2.0f;
     }
-    corrigeDirecaoCanhao();
+}
+
+void atiraProjetil() {
+    DirecaoCanhao = Ponto(0, 0, 1);
+    DirecaoCanhao.rotacionaX(AnguloCanhao.x);
+    DirecaoCanhao.rotacionaY(AnguloVeiculo.y);
+    // No material de apoio, "B"
+    Ponto PosicaoCanhao = PosicaoVeiculo + PosicaoRelativaCanhao;
+    Ponto DirecaoProjetil = PosicaoRelativaCanhao + DirecaoCanhao * forcaCanhao;
+    float Distancia = 2 * forcaCanhao * cos(AnguloCanhao.x * M_PI / 180);
+    // No material de apoio, "C"
+    Ponto Alvo = PosicaoCanhao + Ponto(0, 0, Distancia);
 }
 
 void keyboard(unsigned char key, int x, int y) {
@@ -486,7 +490,7 @@ void keyboard(unsigned char key, int x, int y) {
             forcaCanhao -= 0.5f;
             break;
         case ' ':
-            cout << "Tiro" << endl;
+            atiraProjetil();
             break;
         default:
             cout << "Tecla " << key << " nao tem funcao definida" << endl;
