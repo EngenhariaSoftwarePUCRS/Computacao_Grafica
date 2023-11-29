@@ -71,6 +71,9 @@ void moveVeiculo(unsigned char key);
 void rotacionaVeiculo(unsigned char key);
 void rotacionaCanhao(unsigned char key);
 void atiraProjetil();
+void TracaPontosDeControle(Ponto PC[]);
+Ponto CalculaBezier3(Ponto PC[], double t);
+void TracaBezier3Pontos();
 void init(void);
 void display(void);
 void PosicUser();
@@ -101,6 +104,8 @@ Ponto DirecaoVeiculo;
 Ponto AnguloCanhao;
 Ponto DirecaoCanhao;
 float forcaCanhao;
+
+Ponto PontosBezier[3];
 
 void DesenhaChao() {
     glPushMatrix();
@@ -255,6 +260,53 @@ void atiraProjetil() {
     float Distancia = 2 * forcaCanhao * cos(AnguloCanhao.x * M_PI / 180);
     // No material de apoio, "C"
     Ponto Alvo = PosicaoCanhao + Ponto(0, 0, Distancia);
+
+    PontosBezier[0] = PosicaoCanhao;
+    PontosBezier[1] = PosicaoCanhao + DirecaoProjetil * 0.5;
+    PontosBezier[2] = Alvo;
+    
+    PontosBezier[0].imprime("P0 - PosicaoCanhao", "\n");
+    PontosBezier[1].imprime("P1 - DirecaoProjetil", "\n");
+    PontosBezier[2].imprime("P2 - Alvo", "\n");
+    glLineWidth(1);
+    defineCor(VioletRed);
+    TracaBezier3Pontos();
+    defineCor(MandarinOrange);
+    TracaPontosDeControle(PontosBezier);
+}
+
+void TracaPontosDeControle(Ponto PC[]) {
+    glPointSize(10);
+    glBegin(GL_POINTS);
+        glVertex3f(PC[0].x, PC[0].y, PC[0].z);
+        glVertex3f(PC[1].x, PC[1].y, PC[1].z);
+        glVertex3f(PC[2].x, PC[2].y, PC[2].z);
+    glEnd();
+}
+
+Ponto CalculaBezier3(Ponto PC[], double t) {
+    double UmMenosT = 1 - t;
+    return PC[0] * UmMenosT * UmMenosT + PC[1] * 2 * UmMenosT * t + PC[2] * t * t;
+}
+
+void TracaBezier3Pontos() {
+    double t=0.0;
+    double DeltaT = 1.0/50;
+    Ponto P;
+    cout << "DeltaT: " << DeltaT << endl;
+    glBegin(GL_LINE_STRIP);
+    
+    cout << "Pontos da curva de Bezier" << endl;
+    P.imprime("Ponto inicial", "\n");
+    while (t < 1.0) {
+        P = CalculaBezier3(PontosBezier, t);
+        glVertex2f(P.x, P.y);
+        t += DeltaT;
+    }
+    P = CalculaBezier3(PontosBezier, 1.0); // faz o acabamento da curva
+    glVertex2f(P.x, P.y);
+    
+    glEnd();
 }
 
 void init(void) {
