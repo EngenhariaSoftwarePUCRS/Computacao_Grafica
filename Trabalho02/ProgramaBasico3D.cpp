@@ -102,7 +102,7 @@ void init(void) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     // Reset wall grid
-    PosicaoParedao = Ponto(0, 0, sceneDepth / 2);
+    PosicaoParedao = Ponto(0, -1, sceneDepth / 2);
     for (int i = 0; i < sceneWidth; i++)
         for (int j = 0; j < wallHeight; j++)
             wallGrid[i][j] = true;
@@ -239,8 +239,8 @@ void DesenhaLadrilho(int corBorda, int corDentro) {
 void DesenhaParedao() {
     glPushMatrix();
         glTranslated(PosicaoParedao.x, PosicaoParedao.y, PosicaoParedao.z);
+        glRotatef(-90, 1, 0, 0);
         glPushMatrix();
-            glRotatef(-90, 1, 0, 0);
             for (int x = 0; x < sceneWidth; x++) {
                 glPushMatrix();
                     for (int z = 0; z < wallHeight; z++) {
@@ -252,20 +252,29 @@ void DesenhaParedao() {
                 glTranslated(1, 0, 0);
             }
         glPopMatrix();
-        glTranslated(0, -0.5, 0);
-        DesenhaMalhaLadrilhos(sceneWidth, 1, DarkBrown);
+    glPopMatrix();
+    glPushMatrix();
+        glTranslated(PosicaoParedao.x, PosicaoParedao.y, PosicaoParedao.z);
+        glPushMatrix();
+            for (int x = 0; x < sceneWidth; x++) {
+                DesenhaLadrilho(MediumGoldenrod, DarkBrown);
+                glTranslated(1, 0, 0);
+            }
+        glPopMatrix();
     glPopMatrix();
 }
 
 void DesenhaChao() {
     glPushMatrix();
-        glTranslated(0, -0.5, 0);
+        glTranslated(0, -1, 0);
         for (int x = 0; x < sceneWidth; x++) {
+            glPushMatrix();
             for (int z = 0; z < sceneDepth; z++) {
                 float color = z < sceneDepth / 2 ? BlueViolet : IndianRed;
                 DesenhaLadrilho(MediumGoldenrod, color);
                 glTranslated(0, 0, 1);
             }
+            glPopMatrix();
             glTranslated(1, 0, 0);
         }
     glPopMatrix();
