@@ -62,9 +62,12 @@ double nFrames = 0;
 double TempoTotal = 0;
 
 // Constants
-int wallHeight;
-int sceneWidth;
-int sceneDepth;
+const int wallHeight = 15;
+const int sceneWidth = 25;
+const int sceneDepth = 50;
+
+Ponto PosicaoParedao;
+bool wallGrid[sceneWidth][wallHeight];
 
 Ponto TamanhoVeiculo;
 float distanciaMovimentoVeiculo;
@@ -98,9 +101,11 @@ void init(void) {
     else
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    sceneWidth = 25;
-    wallHeight = 15;
-    sceneDepth = 50;
+    // Reset wall grid
+    PosicaoParedao = Ponto(0, 0, sceneDepth / 2);
+    for (int i = 0; i < sceneWidth; i++)
+        for (int j = 0; j < wallHeight; j++)
+            wallGrid[i][j] = true;
 
     TamanhoVeiculo = Ponto(2, 1, 3);
     distanciaMovimentoVeiculo = 1.0f;
@@ -231,28 +236,23 @@ void DesenhaLadrilho(int corBorda, int corDentro) {
     glEnd();
 }
 
-void DesenhaMalhaLadrilhos(int width, int depth, int innerColor) {
-    glPushMatrix();
-    for(int x = 0; x < width; x++) {
-        glPushMatrix();
-        for(int z = 0; z < depth; z++) {
-            DesenhaLadrilho(MediumGoldenrod, innerColor);
-            glTranslated(0, 0, 1);
-        }
-        glPopMatrix();
-        glTranslated(1, 0, 0);
-    }
-    glPopMatrix();
-}
-
 void DesenhaParedao() {
     glPushMatrix();
-        glTranslated(0, 0, sceneDepth / 2);
-        glRotatef(-90, 1, 0, 0);
-        DesenhaMalhaLadrilhos(sceneWidth, wallHeight, DarkBrown);
-    glPopMatrix();
-    glPushMatrix();
-        glTranslated(0, -0.5, sceneDepth / 2);
+        glTranslated(PosicaoParedao.x, PosicaoParedao.y, PosicaoParedao.z);
+        glPushMatrix();
+            glRotatef(-90, 1, 0, 0);
+            for (int x = 0; x < sceneWidth; x++) {
+                glPushMatrix();
+                    for (int z = 0; z < wallHeight; z++) {
+                        if (wallGrid[x][z])
+                            DesenhaLadrilho(MediumGoldenrod, DarkBrown);
+                        glTranslated(0, 0, 1);
+                    }
+                glPopMatrix();
+                glTranslated(1, 0, 0);
+            }
+        glPopMatrix();
+        glTranslated(0, -0.5, 0);
         DesenhaMalhaLadrilhos(sceneWidth, 1, DarkBrown);
     glPopMatrix();
 }
@@ -260,12 +260,14 @@ void DesenhaParedao() {
 void DesenhaChao() {
     glPushMatrix();
         glTranslated(0, -0.5, 0);
-        DesenhaMalhaLadrilhos(sceneWidth, sceneDepth / 2, BlueViolet);
-    glPopMatrix();
-    glPushMatrix();
-        int behindWallDepth = sceneDepth / 2 + 1;
-        glTranslated(0, -0.5, behindWallDepth);
-        DesenhaMalhaLadrilhos(sceneWidth, sceneDepth / 2, IndianRed);
+        for (int x = 0; x < sceneWidth; x++) {
+            for (int z = 0; z < sceneDepth; z++) {
+                float color = z < sceneDepth / 2 ? BlueViolet : IndianRed;
+                DesenhaLadrilho(MediumGoldenrod, color);
+                glTranslated(0, 0, 1);
+            }
+            glTranslated(1, 0, 0);
+        }
     glPopMatrix();
 }
 
@@ -334,7 +336,7 @@ void PosicUser() {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     gluLookAt(
-        PosicaoVeiculo.x - 1, PosicaoVeiculo.y + 1, PosicaoVeiculo.z - 5,
+        PosicaoVeiculo.x - 5, PosicaoVeiculo.y + 1, PosicaoVeiculo.z,
         PosicaoVeiculo.x, PosicaoVeiculo.y, PosicaoVeiculo.z,
         // Vetor ViewUp
         0.0f, 1.0f, 0.0f
