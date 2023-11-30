@@ -66,6 +66,7 @@ double nFrames = 0;
 double TempoTotal = 0;
 
 // Prototipos
+void DisplayMenu();
 void DesenhaChao();
 void DesenhaParedao();
 void DesenhaLadrilho();
@@ -83,7 +84,8 @@ bool ColideVeiculo();
 bool ColideParedao(Ponto P);
 void QuebraParedao(Ponto P);
 bool ColidePiso(Ponto P);
-int ColideAnimigo(Ponto P);
+int ColideAnimigo(Ponto P, Ponto Offset);
+bool handleGameOver();
 GLuint LoadTexture(const char *nomeTextura);
 void init(void);
 void display(void);
@@ -121,12 +123,32 @@ Ponto AnguloCanhao;
 Ponto DirecaoCanhao;
 float forcaCanhao;
 
-float pontuacao;
 Ponto PontosBezier[3];
 bool isShooting;
 float deslocamentoProjetil;
 
 bool sideView;
+
+int inimigosCount;
+float pontuacao;
+bool gameOver;
+
+void DisplayMenu() {
+    cout << "=====================================================================" << endl;
+    cout << "Bem vindo ao jogo!" << endl;
+    cout << "Pressione W/S para mover o veiculo para frente/tras" << endl;
+    cout << "Pressione a/A para rotacionar o veiculo para a esquerda/Direita" << endl;
+    cout << "Pressione b/B para rotacionar o canhao para cima/baixo" << endl;
+    cout << "Pressione c/C para aumentar/diminuir a forca do canhao" << endl;
+    cout << "Pressione ESPACO para atirar" << endl;
+    cout << "Pressione V para ver sua pontuacao e o numero de inimigos restantes" << endl;
+    cout << "Pressione H para ver estas instrucoes novamente" << endl;
+    cout << "Pressione P para ver o cenário lateralmente" << endl;
+    cout << "Pressione E para ver o cenário apenas com as linhas. (ATENCAO: Isto ira reiniciar o jogo)" << endl;
+    cout << "Pressione R para reiniciar" << endl;
+    cout << "Pressione ESC para sair" << endl;
+    cout << "=====================================================================" << endl;
+}
 
 void DesenhaChao() {
     glPushMatrix();
@@ -293,7 +315,7 @@ void DesenhaVeiculo() {
         if (showTexture)
             glPopMatrix();
         
-        // Canhão
+        // Canhao
         glTranslatef(PosicaoRelativaCanhao.x, PosicaoRelativaCanhao.y, PosicaoRelativaCanhao.z);
         glRotatef(AnguloCanhao.x, 1, 0, 0);
         if (showTexture) {
@@ -309,13 +331,17 @@ void DesenhaVeiculo() {
 }
 
 void moveVeiculo(unsigned char key) {
-    // Normaliza o vetor para ter comprimento 1, mantendo apenas a direção
-    DirecaoVeiculo.versor();
-    Ponto DistanciaPercorrida = DirecaoVeiculo * distanciaMovimentoVeiculo;
-    if (key != 'W' && key != 'w') {
+    if (handleGameOver())
+        return;
+    Ponto Direcao = Ponto(0, 0, 1);
+    Direcao.rotacionaY(AnguloVeiculo.y);
+    Ponto DistanciaPercorrida = Direcao * distanciaMovimentoVeiculo;
+    if (key != 'W' && key != 'w' && key != 'S' && key != 's') {
         cout << "Tecla " << key << " invalida para movimentacao do veículo" << endl;
         return;
     }
+    if (key == 's' || key == 'S')
+        DistanciaPercorrida = -DistanciaPercorrida;
     Ponto NovaPosicao = PosicaoVeiculo + DistanciaPercorrida;
     if (NovaPosicao.x < 0 || NovaPosicao.x > sceneWidth) {
         cout << "Movimento invalido, veiculo nao pode sair da pista" << endl;
@@ -329,10 +355,31 @@ void moveVeiculo(unsigned char key) {
         cout << "Movimento invalido, veiculo nao pode colidir com paredes" << endl;
         return;
     }
+
+    Ponto Offset = Ponto(2, 10, 2);
+    int animigo = ColideAnimigo(NovaPosicao, Offset);
+    if (animigo != 0) {
+        bool eraAmigo = animigo == 1;
+        if (eraAmigo) {
+            cout << "Voce atropelou um amigo : (\t-10 pontos" << endl;
+            pontuacao -= 10.0f;
+        } else {
+            cout << "Voce atropelou um inimigo : )\t+10 pontos" << endl;
+            pontuacao += 10.0f;
+            inimigosCount--;
+
+            if (inimigosCount == 0) {
+                cout << "Voce matou todos os inimigos : )" << endl;
+                gameOver = true;
+            }
+        }
+    }
     PosicaoVeiculo = NovaPosicao;
 }
 
 bool VeiculoPodeAvancar(Ponto PontoAtual, Ponto Desejado) {
+    if (handleGameOver())
+        return false;
     if (Desejado.x < 0 || Desejado.x > sceneWidth)
         return false;
     if (Desejado.z < 0 || Desejado.z > sceneDepth)
@@ -343,6 +390,8 @@ bool VeiculoPodeAvancar(Ponto PontoAtual, Ponto Desejado) {
 }
 
 void rotacionaVeiculo(unsigned char key) {
+    if (handleGameOver())
+        return;
     if (key != 'a' && key != 'A') {
         cout << "Tecla " << key << " invalida para rotacao do veiculo" << endl;
         return;
@@ -355,12 +404,11 @@ void rotacionaVeiculo(unsigned char key) {
     if ((AnguloVeiculo.y < -360) || (AnguloVeiculo.y > 360)) {
         AnguloVeiculo.y = 0;
     }
-    DirecaoVeiculo.rotacionaY(AnguloVeiculo.y);
-    DirecaoVeiculo.imprime("Direcao do veiculo: ", "\t\t");
-    cout << "Angulo do veiculo: " << AnguloVeiculo.y << endl;
 }
 
 void rotacionaCanhao(unsigned char key) {
+    if (handleGameOver())
+        return;
     if (key != 'b' && key != 'B') {
         cout << "Tecla " << key << " invalida para movimentacao da  do canhao" << endl;
         return;
@@ -379,6 +427,8 @@ void rotacionaCanhao(unsigned char key) {
 }
 
 void atiraProjetil() {
+    if (handleGameOver())
+        return;
     DirecaoCanhao = Ponto(0, 0, 1);
     DirecaoCanhao.rotacionaX(AnguloCanhao.x);
     DirecaoCanhao.rotacionaY(AnguloVeiculo.y);
@@ -403,6 +453,8 @@ Ponto CalculaBezier3(Ponto PC[], double t) {
 }
 
 void DesenhaProjetil() {
+    if (handleGameOver())
+        return;
     double DeltaT = 1.0 / 50;
     while (deslocamentoProjetil < 1.0) {
         Ponto P = CalculaBezier3(PontosBezier, deslocamentoProjetil);
@@ -416,7 +468,7 @@ void DesenhaProjetil() {
         }
 
         if (ColideParedao(P)) {
-            cout << "Paredão" << endl;
+            cout << "Voce acertou no paredao : )\t+5 pontos" << endl;
             QuebraParedao(P);
             pontuacao += 5.0f;
             deslocamentoProjetil = 1.0f;
@@ -424,17 +476,29 @@ void DesenhaProjetil() {
         }
 
         if (ColidePiso(P)) {
-            cout << "Piso" << endl;
+            cout << "Voce atirou no chao : (\t-5 pontos" << endl;
             pontuacao -= 5.0f;
             deslocamentoProjetil = 1.0f;
             break;
         }
 
-        int animigo = ColideAnimigo(P);
+        Ponto Offset = Ponto(1, 1, 1);
+        int animigo = ColideAnimigo(P, Offset);
         if (animigo != 0) {
-            cout << "Animigo" << endl;
             bool eraAmigo = animigo == 1;
-            pontuacao += eraAmigo ? -10.0f : 10.0f;
+            if (eraAmigo) {
+                cout << "Voce matou um amigo : (\t-10 pontos" << endl;
+                pontuacao -= 10.0f;
+            } else {
+                cout << "Voce matou um inimigo : )\t+10 pontos" << endl;
+                pontuacao += 10.0f;
+                inimigosCount--;
+
+                if (inimigosCount == 0) {
+                    cout << "Voce matou todos os inimigos : )" << endl;
+                    gameOver = true;
+                }
+            }
             deslocamentoProjetil = 1.0f;
             break;
         }
@@ -458,72 +522,102 @@ void DesenhaProjetil() {
 }
 
 bool ColideVeiculo() {
+    if (handleGameOver())
+        return false;
     return AnguloCanhao.x <= -90;
 }
 
 bool ColideParedao(Ponto P) {
+    if (handleGameOver())
+        return false;
     int x = round(P.x);
     int y = round(P.y);
     int z = round(P.z);
     if (x < 0 || x >= sceneWidth || z != sceneDepth / 2 || y < 0 || y >= wallHeight)
         return false;
-    return wallGrid[x][z];
+    return wallGrid[x][y];
 }
 
 void QuebraParedao(Ponto P) {
+    if (handleGameOver())
+        return;
     int x = round(P.x);
     int y = round(P.y);
-    int z = round(P.z);
     wallGrid[x][y] = false;
 
     // Quebra vizinho superior esquerdo
-    wallGrid[x - 1][y + 1] = false;
+    if (x > 0 && y < wallHeight - 1)
+        wallGrid[x - 1][y + 1] = false;
 
     // Quebra vizinho superior
-    wallGrid[x][y + 1] = false;
+    if (y < wallHeight - 1)
+        wallGrid[x][y + 1] = false;
 
     // Quebra vizinho superior direito
-    wallGrid[x + 1][y + 1] = false;
+    if (x < sceneWidth - 1 && y < wallHeight - 1)
+        wallGrid[x + 1][y + 1] = false;
 
     // Quebra vizinho esquerdo
-    wallGrid[x - 1][y] = false;
+    if (x > 0)
+        wallGrid[x - 1][y] = false;
 
     // Quebra vizinho direito
-    wallGrid[x + 1][y] = false;
+    if (x < sceneWidth - 1)
+        wallGrid[x + 1][y] = false;
 
     // Quebra vizinho inferior esquerdo
-    wallGrid[x - 1][y - 1] = false;
+    if (x > 0 && y > 0)
+        wallGrid[x - 1][y - 1] = false;
 
     // Quebra vizinho inferior
-    wallGrid[x][y - 1] = false;
+    if (y > 0)
+        wallGrid[x][y - 1] = false;
 
     // Quebra vizinho inferior direito
-    wallGrid[x + 1][y - 1] = false;    
+    if (x < sceneWidth - 1 && y > 0)
+        wallGrid[x + 1][y - 1] = false;    
 }
 
 bool ColidePiso(Ponto P) {
+    if (handleGameOver())
+        return false;
     return P.y < 0;
 }
 
-int ColideAnimigo(Ponto P) {
+int ColideAnimigo(Ponto P, Ponto Offset) {
+    if (handleGameOver())
+        return false;
     /**
      * 0: Nenhum
      * 1: Amigo
      * 2: Inimigo
     */
-    float offset = 1.0f;
     for (int i = 0; i < animigosCount; i++) {
         if (animigos[i].isAlive) {
             Ponto posicao = animigos[i].posicao;
-            if (P.x >= posicao.x - offset && P.x <= posicao.x + offset &&
-                P.y >= posicao.y - offset && P.y <= posicao.y + offset &&
-                P.z >= posicao.z - offset && P.z <= posicao.z + offset) {
+            if (P.x >= posicao.x - Offset.x && P.x <= posicao.x + Offset.x &&
+                P.y >= posicao.y - Offset.y && P.y <= posicao.y + Offset.y &&
+                P.z >= posicao.z - Offset.z && P.z <= posicao.z + Offset.z) {
                     animigos[i].isAlive = false;
                     return animigos[i].isFriend ? 1 : 2;
             }
         }
     }
     return 0;
+}
+
+bool handleGameOver() {
+    if (!gameOver)
+        return false;
+
+    cout << "Game Over" << endl;
+    cout << "Pontuacao final: " << pontuacao << endl;
+    cout << "Pressione ESC para sair" << endl;
+    cout << "Pressione P para ver o cenário lateralmente" << endl;
+    cout << "Pressione E para ver o cenário apenas com as linhas" << endl;
+    cout << "Pressione R para reiniciar" << endl;
+
+    return true;
 }
 
 GLuint LoadTexture(const char *nomeTextura) {
@@ -623,9 +717,15 @@ void init(void) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
 
+    // Dá as boas-vindas ao usuário
+    DisplayMenu();
+
     sideView = false;
 
+    inimigosCount = animigosCount / 2;
     pontuacao = 0.0f;
+    gameOver = false;
+
     // Reset wall grid
     for (int i = 0; i < sceneWidth; i++)
         for (int j = 0; j < wallHeight; j++)
@@ -645,16 +745,13 @@ void init(void) {
             rand() % ((sceneDepth / 2) - 6) + ((sceneDepth / 2) + 3)
         );
         animigos[i].posicao = posicao;
-        animigos[i].isFriend = i < animigosCount / 2;
+        animigos[i].isFriend = i < inimigosCount;
         animigos[i].isAlive = true;
     }
 
     PosicaoRelativaCamera = Ponto(0, 2, -5);
     TamanhoVeiculo = Ponto(2, 1, 3);
     distanciaMovimentoVeiculo = 1.0f;
-    // TamanhoCanhao = Ponto((1/4.0) * TamanhoVeiculo.x,
-    //                       (1/5.0) * TamanhoVeiculo.y,
-    //                       (2/3.0) * TamanhoVeiculo.z);
     TamanhoCanhao = Ponto(0.5, 0.5, 2.0);
     PosicaoVeiculo = Ponto(6, 0, 4);
     AnguloVeiculo = Ponto(0, 0, 0);
@@ -681,7 +778,7 @@ void DesenhaAnimigos() {
                 if (animigos[i].isFriend)
                     defineCor(LimeGreen);
                 else
-                    defineCor(VioletRed);
+                    defineCor(OrangeRed);
                 animigo.ExibeObjeto();
             glPopMatrix();
         }
@@ -758,6 +855,10 @@ void keyboard(unsigned char key, int x, int y) {
         case 27:
             exit(0);
             break;
+        case 'h':
+        case 'H':
+            DisplayMenu();
+            break;
         case 'e':
         case 'E':
             ModoDeExibicao = !ModoDeExibicao;
@@ -772,9 +873,10 @@ void keyboard(unsigned char key, int x, int y) {
         case 'T':
             showTexture = !showTexture;
             break;
-        case 's':
-        case 'S':
-            cout << "Pontuacao: " << pontuacao << endl;
+        case 'v':
+        case 'V':
+            cout << "Pontuacao atual: " << pontuacao << endl;
+            cout << "Numero de inimigos restantes: " << inimigosCount << endl;
             break;
         case 'r':
         case 'R':
@@ -782,6 +884,8 @@ void keyboard(unsigned char key, int x, int y) {
             break;
         case 'w':
         case 'W':
+        case 's':
+        case 'S':
             moveVeiculo(key);
             break;
         case 'a':
@@ -799,9 +903,9 @@ void keyboard(unsigned char key, int x, int y) {
             forcaCanhao -= 1.0f;
             break;
         case ' ':
-            if (isShooting)
+            if (isShooting) {
                 cout << "Ja existe um projetil em movimento" << endl;
-            else {
+            } else {
                 isShooting = true;
                 atiraProjetil();
                 isShooting = false;
