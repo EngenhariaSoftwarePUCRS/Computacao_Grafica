@@ -151,8 +151,8 @@ void DisplayMenu() {
     cout << "Pressione ESPACO para atirar" << endl;
     cout << "Pressione V para ver sua pontuacao e o numero de inimigos restantes" << endl;
     cout << "Pressione H para ver estas instrucoes novamente" << endl;
-    cout << "Pressione P para ver o cenário lateralmente/em 3ªp" << endl;
-    cout << "Pressione E para ver o cenário apenas com as linhas.\n\t(ATENCAO: Isto ira reiniciar o jogo)" << endl;
+    cout << "Pressione P para ver o cenario lateralmente/em 3ªp" << endl;
+    cout << "Pressione E para ver o cenario apenas com as linhas.\n\t(ATENCAO: Isto ira reiniciar o jogo)" << endl;
     cout << "Pressione R para reiniciar" << endl;
     cout << "Pressione ESC para sair" << endl;
     cout << "=====================================================================" << endl;
@@ -671,8 +671,8 @@ bool handleGameOver() {
     cout << "Game Over" << endl;
     cout << "Pontuacao final: " << pontuacao << endl;
     cout << "Pressione ESC para sair" << endl;
-    cout << "Pressione P para ver o cenário lateralmente" << endl;
-    cout << "Pressione E para ver o cenário apenas com as linhas" << endl;
+    cout << "Pressione P para ver o cenario lateralmente" << endl;
+    cout << "Pressione E para ver o cenario apenas com as linhas" << endl;
     cout << "Pressione R para reiniciar" << endl;
 
     return true;
