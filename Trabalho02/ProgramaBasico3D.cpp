@@ -51,6 +51,11 @@ GLfloat AspectRatio;
 GLuint texturaPiso, texturaParedao, texturaVeiculo, texturaCanhao;
 bool showTexture = true;
 
+typedef struct {
+    Ponto posicao;
+    bool isFriend;
+    bool isAlive;
+} Animigo;
 
 // Controle do modo de projecao
 // 0: Wireframe; 1: Faces preenchidas
@@ -68,16 +73,18 @@ void DesenhaParalelepipedo(float largura, float altura, float profundidade);
 void DesenhaVeiculo();
 void DesenhaAnimigos();
 void moveVeiculo(unsigned char key);
+bool VeiculoPodeAvancar(Ponto PontoAtual, Ponto Desejado);
 void rotacionaVeiculo(unsigned char key);
 void rotacionaCanhao(unsigned char key);
 void atiraProjetil();
 Ponto CalculaBezier3(Ponto PC[], double t);
 void DesenhaProjetil();
-bool ColideParedao(Ponto P1);
-void QuebraParedao(Ponto P1);
-bool ColidePiso(Ponto P1);
-bool ColideAnimigo(Ponto P1);
-bool MataAnimigo(Ponto P1);
+bool ColideVeiculo();
+bool ColideParedao(Ponto P);
+void QuebraParedao(Ponto P);
+bool ColidePiso(Ponto P);
+Animigo* ColideAnimigo(Ponto P);
+bool MataAnimigo(Animigo* animigo);
 GLuint LoadTexture(const char *nomeTextura);
 void init(void);
 void display(void);
@@ -99,11 +106,6 @@ Ponto PosicaoParedao;
 bool wallGrid[sceneWidth][wallHeight];
 
 Objeto3D animigo;
-typedef struct {
-    Ponto posicao;
-    bool isFriend;
-    bool isAlive;
-} Animigo;
 Animigo* animigos;
 
 Ponto PosicaoRelativaCamera;
@@ -309,13 +311,8 @@ void DesenhaVeiculo() {
 
 void moveVeiculo(unsigned char key) {
     // Normaliza o vetor para ter comprimento 1, mantendo apenas a direção
-    float modDirecao = DirecaoVeiculo.modulo();
-    Ponto Direcao = Ponto(
-        DirecaoVeiculo.x / modDirecao,
-        DirecaoVeiculo.y / modDirecao,
-        DirecaoVeiculo.z / modDirecao
-    );
-    Ponto DistanciaPercorrida = Direcao * distanciaMovimentoVeiculo;
+    DirecaoVeiculo.versor();
+    Ponto DistanciaPercorrida = DirecaoVeiculo * distanciaMovimentoVeiculo;
     if (key != 'W' && key != 'w') {
         cout << "Tecla " << key << " invalida para movimentacao do veículo" << endl;
         return;
@@ -329,7 +326,21 @@ void moveVeiculo(unsigned char key) {
         cout << "Movimento invalido, veiculo nao pode sair da pista" << endl;
         return;
     }
+    if (!VeiculoPodeAvancar(PosicaoVeiculo, NovaPosicao)) {
+        cout << "Movimento invalido, veiculo nao pode colidir com paredes" << endl;
+        return;
+    }
     PosicaoVeiculo = NovaPosicao;
+}
+
+bool VeiculoPodeAvancar(Ponto PontoAtual, Ponto Desejado) {
+    if (Desejado.x < 0 || Desejado.x > sceneWidth)
+        return false;
+    if (Desejado.z < 0 || Desejado.z > sceneDepth)
+        return false;
+    if (ColideParedao(Desejado))
+        return false;
+    return true;
 }
 
 void rotacionaVeiculo(unsigned char key) {
@@ -342,7 +353,12 @@ void rotacionaVeiculo(unsigned char key) {
     } else if (key == 'A') {
         AnguloVeiculo.y += 1.0f;
     }
+    if ((AnguloVeiculo.y < -360) || (AnguloVeiculo.y > 360)) {
+        AnguloVeiculo.y = 0;
+    }
     DirecaoVeiculo.rotacionaY(AnguloVeiculo.y);
+    DirecaoVeiculo.imprime("Direcao do veiculo: ", "\t\t");
+    cout << "Angulo do veiculo: " << AnguloVeiculo.y << endl;
 }
 
 void rotacionaCanhao(unsigned char key) {
@@ -392,9 +408,16 @@ void DesenhaProjetil() {
     while (deslocamentoProjetil < 1.0) {
         Ponto P = CalculaBezier3(PontosBezier, deslocamentoProjetil);
 
+        if (ColideVeiculo()) {
+            cout << "Voce se matou : (" << endl;
+            cout << "Pontuacao final: " << pontuacao << endl;
+            pontuacao = -671.0f;
+            deslocamentoProjetil = 1.0f;
+            break;
+        }
+
         if (ColideParedao(P)) {
-            cout << "Colisao com parede" << endl;
-            P.imprime("Sou um ponto", "\n");
+            cout << "Paredão" << endl;
             QuebraParedao(P);
             pontuacao += 5.0f;
             deslocamentoProjetil = 1.0f;
@@ -402,12 +425,14 @@ void DesenhaProjetil() {
         }
 
         if (ColidePiso(P)) {
+            cout << "Piso" << endl;
             pontuacao -= 5.0f;
             deslocamentoProjetil = 1.0f;
             break;
         }
 
         if (ColideAnimigo(P)) {
+            cout << "Animigo" << endl;
             bool eraAmigo = MataAnimigo(P);
             pontuacao += eraAmigo ? -10.0f : 10.0f;
             deslocamentoProjetil = 1.0f;
@@ -421,32 +446,35 @@ void DesenhaProjetil() {
         glPopMatrix();
         deslocamentoProjetil += DeltaT;
     }
-    // Desenha pontos de controle
-    float colors[3] = {OrangeRed, GreenYellow, SkyBlue};
-    for (int i = 0; i < 3; i++) {
-        glPushMatrix();
-            defineCor(colors[i]);
-            glTranslated(PontosBezier[i].x, PontosBezier[i].y, PontosBezier[i].z);
-            glutSolidSphere(TamanhoCanhao.x * 0.8, 20, 20);
-        glPopMatrix();
-    }
+    // // Desenha pontos de controle
+    // float colors[3] = {OrangeRed, GreenYellow, SkyBlue};
+    // for (int i = 0; i < 3; i++) {
+    //     glPushMatrix();
+    //         defineCor(colors[i]);
+    //         glTranslated(PontosBezier[i].x, PontosBezier[i].y, PontosBezier[i].z);
+    //         glutSolidSphere(TamanhoCanhao.x * 0.8, 20, 20);
+    //     glPopMatrix();
+    // }
 }
 
-bool ColideParedao(Ponto P1) {
-    int x = round(P1.x);
-    int y = round(P1.y);
-    int z = round(P1.z);
+bool ColideVeiculo() {
+    return AnguloCanhao.x <= -90;
+}
+
+bool ColideParedao(Ponto P) {
+    int x = round(P.x);
+    int y = round(P.y);
+    int z = round(P.z);
     if (x < 0 || x >= sceneWidth || z != sceneDepth / 2 || y < 0 || y >= wallHeight)
         return false;
     return wallGrid[x][z];
 }
 
-void QuebraParedao(Ponto P1) {
-    int x = round(P1.x);
-    int y = round(P1.y);
-    int z = round(P1.z);
+void QuebraParedao(Ponto P) {
+    int x = round(P.x);
+    int y = round(P.y);
+    int z = round(P.z);
     wallGrid[x][y] = false;
-    cout << "Quebrando parede em " << x << ", " << y << ", " << z << endl;
 
     // Quebra vizinho superior esquerdo
     wallGrid[x - 1][y + 1] = false;
@@ -473,16 +501,27 @@ void QuebraParedao(Ponto P1) {
     wallGrid[x + 1][y - 1] = false;    
 }
 
-bool ColidePiso(Ponto P1) {
-    return false;
+bool ColidePiso(Ponto P) {
+    return P.y < 0;
 }
 
-bool ColideAnimigo(Ponto P1) {
-    return false;
+Animigo* ColideAnimigo(Ponto P) {
+    float offset = 1.0f;
+    for (int i = 0; i < animigosCount; i++) {
+        if (animigos[i].isAlive) {
+            Ponto posicao = animigos[i].posicao;
+            if (P.x >= posicao.x - offset && P.x <= posicao.x + offset &&
+                P.y >= posicao.y - offset && P.y <= posicao.y + offset &&
+                P.z >= posicao.z - offset && P.z <= posicao.z + offset) {
+                return &animigos[i];
+            }
+        }
+    }
 }
 
-bool MataAnimigo(Ponto P1) {
-    return false;
+bool MataAnimigo(Animigo* animigo) {
+    animigo -> isAlive = false;
+    return animigo -> isFriend;
 }
 
 GLuint LoadTexture(const char *nomeTextura) {
@@ -549,7 +588,7 @@ GLuint LoadTexture(const char *nomeTextura) {
 
     Img.Delete();
 
-    cout << "Carga de textura OK." << endl;
+    // cout << "Carga de textura OK." << endl;
     return IdTEX;
 }
 
@@ -621,7 +660,7 @@ void init(void) {
     PosicaoRelativaCanhao = Ponto(0, 0.5, 1);
     AnguloCanhao = Ponto(0, 0, 0);
     DirecaoCanhao = Ponto(0, 0, 1);
-    forcaCanhao = 5.0f;
+    forcaCanhao = 25.0f;
     isShooting = false;
     deslocamentoProjetil = 1.0f;
 }
@@ -718,17 +757,25 @@ void keyboard(unsigned char key, int x, int y) {
             exit(0);
             break;
         case 'e':
+        case 'E':
             ModoDeExibicao = !ModoDeExibicao;
             init();
             glutPostRedisplay();
             break;
         case 'p':
+        case 'P':
             sideView = !sideView;
             break;
         case 't':
+        case 'T':
             showTexture = !showTexture;
             break;
+        case 's':
+        case 'S':
+            cout << "Pontuacao: " << pontuacao << endl;
+            break;
         case 'r':
+        case 'R':
             init();
             break;
         case 'w':
@@ -744,12 +791,10 @@ void keyboard(unsigned char key, int x, int y) {
             rotacionaCanhao(key);
             break;
         case 'c':
-            forcaCanhao += 0.5f;
-            cout << "+Forca do canhao: " << forcaCanhao << endl;
+            forcaCanhao += 1.0f;
             break;
         case 'C':
-            forcaCanhao -= 0.5f;
-            cout << "-Forca do canhao: " << forcaCanhao << endl;
+            forcaCanhao -= 1.0f;
             break;
         case ' ':
             if (isShooting)

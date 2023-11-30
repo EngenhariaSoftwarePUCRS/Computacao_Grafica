@@ -53,8 +53,8 @@ protected:
         }
         else FillLineAddress();
      
-		cout << "Image " << name << " loaded !"<< endl;
-		cout << "Channels:" << channels << endl;
+		// cout << "Image " << name << " loaded !"<< endl;
+		// cout << "Channels:" << channels << endl;
         
 		return true;
 	}

@@ -542,7 +542,7 @@
 1700874912 source:f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\ponto.cpp
 	"Ponto.h"
 
-1701321418 source:f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\programabasico3d.cpp
+1701326312 source:f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\programabasico3d.cpp
 	<iostream>
 	<cmath>
 	<ctime>
@@ -649,7 +649,7 @@
 	<GLUT/glut.h>
 	"ImageClass.h"
 
-1701304125 f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\imageclass.h
+1701322063 f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\imageclass.h
 	<iostream>
 	<cstdlib>
 	<cstring>
@@ -666,7 +666,7 @@
 	"Objeto3D.h"
 	"Ponto.h"
 
-1701318455 f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\objeto3d.h
+1701321720 f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\objeto3d.h
 	<iostream>
 	<fstream>
 	<glut.h>
