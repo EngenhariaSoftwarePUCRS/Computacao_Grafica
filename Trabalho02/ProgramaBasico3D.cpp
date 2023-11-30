@@ -40,6 +40,7 @@ using namespace std;
 #include "SOIL/SOIL.h"
 #include "ImageClass.h"
 #include "Temporizador.h"
+#include "Objeto3D.h"
 #include "ListaDeCoresRGB.h"
 #include "Ponto.h"
 Temporizador T;
@@ -65,6 +66,7 @@ void DesenhaParedao();
 void DesenhaLadrilho();
 void DesenhaParalelepipedo(float largura, float altura, float profundidade);
 void DesenhaVeiculo();
+void DesenhaAnimigos();
 void moveVeiculo(unsigned char key);
 void rotacionaVeiculo(unsigned char key);
 void rotacionaCanhao(unsigned char key);
@@ -86,9 +88,18 @@ void reshape(int w, int h);
 const int wallHeight = 15;
 const int sceneWidth = 25;
 const int sceneDepth = 50;
+const int animigosCount = 20;
 
 Ponto PosicaoParedao;
 bool wallGrid[sceneWidth][wallHeight];
+
+Objeto3D animigo;
+typedef struct {
+    Ponto posicao;
+    bool isFriend;
+    bool isAlive;
+} Animigo;
+Animigo* animigos;
 
 Ponto PosicaoRelativaCamera;
 Ponto TamanhoVeiculo;
@@ -503,13 +514,30 @@ void init(void) {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }
 
-    sideView = true;
+    sideView = false;
 
     // Reset wall grid
     PosicaoParedao = Ponto(0, -1, sceneDepth / 2);
     for (int i = 0; i < sceneWidth; i++)
         for (int j = 0; j < wallHeight; j++)
             wallGrid[i][j] = true;
+
+    // Setup friends and enemies
+    srand(time(NULL));
+    animigo = Objeto3D();
+    animigo.LeObjeto("assets/Vaca.tri");
+    animigos = new Animigo[animigosCount];
+    for (int i = 0; i < animigosCount; i++) {
+        // Position randomly on second half of depth, height 1, and random width
+        Ponto posicao = Ponto(
+            rand() % (sceneWidth - 3),
+            3,
+            rand() % ((sceneDepth / 2) - 6) + ((sceneDepth / 2) + 3)
+        );
+        animigos[i].posicao = posicao;
+        animigos[i].isFriend = i < animigosCount / 2;
+        animigos[i].isAlive = true;
+    }
 
     PosicaoRelativaCamera = Ponto(0, 2, -5);
     TamanhoVeiculo = Ponto(2, 1, 3);
@@ -529,6 +557,27 @@ void init(void) {
     deslocamentoProjetil = 1.0f;
 }
 
+void DesenhaAnimigos() {
+    for (int i = 0; i < animigosCount; i++) {
+        if (animigos[i].isAlive) {
+            Ponto posicao = animigos[i].posicao;
+            glPushMatrix();
+                float x = posicao.x;
+                float y = posicao.y;
+                float z = posicao.z;
+                glTranslatef(x, y, z);
+                glRotatef(-90, 1, 0, 0);
+                glScalef(0.1, 0.1, 0.1);
+                if (animigos[i].isFriend)
+                    defineCor(LimeGreen);
+                else
+                    defineCor(VioletRed);
+                animigo.ExibeObjeto();
+            glPopMatrix();
+        }
+    }
+}
+
 void display(void) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -545,6 +594,8 @@ void display(void) {
     DesenhaVeiculo();
 
     DesenhaProjetil();
+
+    DesenhaAnimigos();
 
 	glutSwapBuffers();
 }
