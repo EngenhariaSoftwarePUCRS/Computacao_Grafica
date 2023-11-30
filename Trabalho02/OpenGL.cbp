@@ -61,6 +61,8 @@
 			<Add option="-Wno-narrowing" />
 			<Add option="-Wno-deprecated-declarations" />
 		</Compiler>
+		<Unit filename="ImageClass.cpp" />
+		<Unit filename="ImageClass.h" />
 		<Unit filename="Linha.cpp" />
 		<Unit filename="Linha.h" />
 		<Unit filename="ListaDeCoresRGB.cpp" />
@@ -70,8 +72,22 @@
 		<Unit filename="Ponto.cpp" />
 		<Unit filename="Ponto.h" />
 		<Unit filename="ProgramaBasico3D.cpp" />
+		<Unit filename="SOIL/SOIL.cpp" />
+		<Unit filename="SOIL/SOIL.h" />
+		<Unit filename="SOIL/image_DXT.cpp" />
+		<Unit filename="SOIL/image_DXT.h" />
+		<Unit filename="SOIL/image_helper.cpp" />
+		<Unit filename="SOIL/image_helper.h" />
+		<Unit filename="SOIL/stb_image_aug.cpp" />
+		<Unit filename="SOIL/stb_image_aug.h" />
+		<Unit filename="SOIL/stbi_DDS_aug.h" />
+		<Unit filename="SOIL/stbi_DDS_aug_c.h" />
 		<Unit filename="Temporizador.cpp" />
 		<Unit filename="Temporizador.h" />
-		<Extensions />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
 	</Project>
 </CodeBlocks_project_file>
