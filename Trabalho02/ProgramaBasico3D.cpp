@@ -48,7 +48,7 @@ double AccumDeltaT=0;
 
 
 GLfloat AspectRatio;
-GLuint texturaPiso, texturaParedao, texturaVeiculo, texturaCanhao;
+GLuint texturaChao, texturaParedao, texturaVeiculo, texturaCanhao;
 bool showTexture = true;
 
 typedef struct {
@@ -69,7 +69,7 @@ double TempoTotal = 0;
 void DisplayMenu();
 void DesenhaChao();
 void DesenhaParedao();
-void DesenhaLadrilho();
+void DesenhaLadrilho(bool);
 void DesenhaParalelepipedo(float largura, float altura, float profundidade);
 void DesenhaVeiculo();
 void DesenhaAnimigos();
@@ -81,9 +81,9 @@ void atiraProjetil();
 Ponto CalculaBezier3(Ponto PC[], double t);
 void DesenhaProjetil();
 bool ColideVeiculo();
-bool ColideParedao(Ponto P);
+bool ColideParedao(Ponto P, Ponto Offset);
 void QuebraParedao(Ponto P);
-bool ColidePiso(Ponto P);
+bool ColideChao(Ponto P);
 int ColideAnimigo(Ponto P, Ponto Offset);
 bool handleGameOver();
 GLuint LoadTexture(const char *nomeTextura);
@@ -105,6 +105,14 @@ const int animigosCount = 20;
 
 Ponto PosicaoParedao;
 bool wallGrid[sceneWidth][wallHeight];
+float variavelAtualXglobalParedao;
+float variavelAtualZglobalParedao;
+const float deltaVariavelXglobalParedao = 1.0 / sceneWidth;
+const float deltaVariavelZglobalParedao = 1.0 / wallHeight;
+float variavelAtualXglobalChao;
+float variavelAtualZglobalChao;
+const float deltaVariavelXglobalChao = 1.0 / sceneWidth;
+const float deltaVariavelZglobalChao = 1.0 / sceneDepth;
 
 Objeto3D animigo;
 Animigo* animigos;
@@ -136,48 +144,56 @@ bool gameOver;
 void DisplayMenu() {
     cout << "=====================================================================" << endl;
     cout << "Bem vindo ao jogo!" << endl;
-    cout << "Pressione W/S para mover o veiculo para frente/tras" << endl;
-    cout << "Pressione a/A para rotacionar o veiculo para a esquerda/Direita" << endl;
+    cout << "Pressione w/S para mover o veiculo para frente/tras" << endl;
+    cout << "Pressione a/D para rotacionar o veiculo para a esquerda/Direita" << endl;
     cout << "Pressione b/B para rotacionar o canhao para cima/baixo" << endl;
     cout << "Pressione c/C para aumentar/diminuir a forca do canhao" << endl;
     cout << "Pressione ESPACO para atirar" << endl;
     cout << "Pressione V para ver sua pontuacao e o numero de inimigos restantes" << endl;
     cout << "Pressione H para ver estas instrucoes novamente" << endl;
-    cout << "Pressione P para ver o cenário lateralmente" << endl;
-    cout << "Pressione E para ver o cenário apenas com as linhas. (ATENCAO: Isto ira reiniciar o jogo)" << endl;
+    cout << "Pressione P para ver o cenário lateralmente/em 3ªp" << endl;
+    cout << "Pressione E para ver o cenário apenas com as linhas.\n\t(ATENCAO: Isto ira reiniciar o jogo)" << endl;
     cout << "Pressione R para reiniciar" << endl;
     cout << "Pressione ESC para sair" << endl;
     cout << "=====================================================================" << endl;
 }
 
 void DesenhaChao() {
+    variavelAtualXglobalChao = 0.0;
+    variavelAtualZglobalChao = 0.0;
     glPushMatrix();
-        if (showTexture) {
-            glPushMatrix();
-                glBindTexture(GL_TEXTURE_2D, texturaPiso);
-        } else {
-            defineCor(DarkGreen);
-        }
-        glTranslated(0, -1, 0);
-        for (int x = 0; x < sceneWidth; x++) {
-            glPushMatrix();
+    if (showTexture) {
+        glPushMatrix();
+            glBindTexture(GL_TEXTURE_2D, texturaChao);
+    } else {
+        defineCor(DarkGreen);
+    }
+    glTranslated(0, -1, 0);
+    for (int x = 0; x < sceneWidth; x++) {
+        glPushMatrix();
             for (int z = 0; z < sceneDepth; z++) {
-                DesenhaLadrilho();
+                DesenhaLadrilho(false);
+                variavelAtualZglobalChao += deltaVariavelZglobalChao;
                 glTranslated(0, 0, 1);
             }
-            glPopMatrix();
-            glTranslated(1, 0, 0);
-        }
-        if (showTexture)
-            glPopMatrix();
+        glPopMatrix();
+        variavelAtualZglobalChao = 0.0;
+        glTranslated(1, 0, 0);
+        variavelAtualXglobalChao += deltaVariavelXglobalChao;
+    }
+    if (showTexture)
+        glPopMatrix();
     glPopMatrix();
 }
 
 void DesenhaParedao() {
+    variavelAtualXglobalParedao = 0.0;
+    variavelAtualZglobalParedao = 0.0;
+
     glPushMatrix();
         if (showTexture) {
             glPushMatrix();
-                glBindTexture(GL_TEXTURE_2D, texturaParedao);
+            glBindTexture(GL_TEXTURE_2D, texturaParedao);
         } else {
             defineCor(DarkBrown);
         }
@@ -188,11 +204,14 @@ void DesenhaParedao() {
                 glPushMatrix();
                     for (int z = 0; z < wallHeight; z++) {
                         if (wallGrid[x][z])
-                            DesenhaLadrilho();
+                            DesenhaLadrilho(true);
+                        variavelAtualZglobalParedao += deltaVariavelZglobalParedao;
                         glTranslated(0, 0, 1);
                     }
                 glPopMatrix();
+                variavelAtualZglobalParedao = 0.0;
                 glTranslated(1, 0, 0);
+                variavelAtualXglobalParedao += deltaVariavelXglobalParedao;
             }
         glPopMatrix();
         if (showTexture)
@@ -200,27 +219,42 @@ void DesenhaParedao() {
     glPopMatrix();
 }
 
-void DesenhaLadrilho() {
-    // Desenha quadrado preenchido
+void DesenhaLadrilho(bool parede) {
+    float variavelXLocalLadrilho;
+    float variavelYLocalLadrilho;
+    float nextVariavelXLocalLadrilho;
+    float nextVariavelYLocalLadrilho;
+    if (parede) {
+        variavelXLocalLadrilho = variavelAtualXglobalParedao;
+        variavelYLocalLadrilho = variavelAtualZglobalParedao;
+        nextVariavelXLocalLadrilho = variavelAtualXglobalParedao + deltaVariavelXglobalParedao;
+        nextVariavelYLocalLadrilho = variavelAtualZglobalParedao + deltaVariavelZglobalParedao;
+    } else {
+        variavelXLocalLadrilho = variavelAtualXglobalChao;
+        variavelYLocalLadrilho = variavelAtualZglobalChao;
+        nextVariavelXLocalLadrilho = variavelAtualXglobalChao + deltaVariavelXglobalChao;
+        nextVariavelYLocalLadrilho = variavelAtualZglobalChao + deltaVariavelZglobalChao;
+    }
+
     glBegin(GL_QUADS);
         glNormal3f(0, 1, 0);
-        glTexCoord2f(0.0f, 1.0f);
+        glTexCoord2f(variavelXLocalLadrilho, variavelYLocalLadrilho);
         glVertex3f(-0.5f, 0.0f, -0.5f);
-        glTexCoord2f(0.0f, 0.0f);
+        glTexCoord2f(variavelXLocalLadrilho, nextVariavelYLocalLadrilho);
         glVertex3f(-0.5f, 0.0f, 0.5f);
-        glTexCoord2f(1.0f, 0.0f);
+        glTexCoord2f(nextVariavelXLocalLadrilho, nextVariavelYLocalLadrilho);
         glVertex3f(0.5f, 0.0f, 0.5f);
-        glTexCoord2f(1.0f, 1.0f);
+        glTexCoord2f(nextVariavelXLocalLadrilho, variavelYLocalLadrilho);
         glVertex3f(0.5f, 0.0f, -0.5f);
     glEnd();
 
     defineCor(MediumGoldenrod);
     glBegin(GL_LINE_STRIP);
-        glNormal3f(0,1,0);
-        glVertex3f(-0.5f,  0.0f, -0.5f);
-        glVertex3f(-0.5f,  0.0f,  0.5f);
-        glVertex3f( 0.5f,  0.0f,  0.5f);
-        glVertex3f( 0.5f,  0.0f, -0.5f);
+        glNormal3f(0, 1, 0);
+        glVertex3f(-0.5f, 0.0f, -0.5f);
+        glVertex3f(-0.5f, 0.0f, 0.5f);
+        glVertex3f(0.5f, 0.0f, 0.5f);
+        glVertex3f(0.5f, 0.0f, -0.5f);
     glEnd();
 }
 
@@ -330,6 +364,27 @@ void DesenhaVeiculo() {
     glPopMatrix();
 }
 
+void DesenhaAnimigos() {
+    for (int i = 0; i < animigosCount; i++) {
+        if (animigos[i].isAlive) {
+            Ponto posicao = animigos[i].posicao;
+            glPushMatrix();
+                float x = posicao.x;
+                float y = posicao.y;
+                float z = posicao.z;
+                glTranslatef(x, y, z);
+                glRotatef(-90, 1, 0, 0);
+                glScalef(0.08, 0.08, 0.08);
+                if (animigos[i].isFriend)
+                    defineCor(LimeGreen);
+                else
+                    defineCor(OrangeRed);
+                animigo.ExibeObjeto();
+            glPopMatrix();
+        }
+    }
+}
+
 void moveVeiculo(unsigned char key) {
     if (handleGameOver())
         return;
@@ -356,7 +411,7 @@ void moveVeiculo(unsigned char key) {
         return;
     }
 
-    Ponto Offset = Ponto(2, 10, 2);
+    Ponto Offset = Ponto(3, 100, 3);
     int animigo = ColideAnimigo(NovaPosicao, Offset);
     if (animigo != 0) {
         bool eraAmigo = animigo == 1;
@@ -371,6 +426,7 @@ void moveVeiculo(unsigned char key) {
             if (inimigosCount == 0) {
                 cout << "Voce matou todos os inimigos : )" << endl;
                 gameOver = true;
+                handleGameOver();
             }
         }
     }
@@ -384,7 +440,8 @@ bool VeiculoPodeAvancar(Ponto PontoAtual, Ponto Desejado) {
         return false;
     if (Desejado.z < 0 || Desejado.z > sceneDepth)
         return false;
-    if (ColideParedao(Desejado))
+    Ponto Offset = Ponto(0, 0, distanciaMovimentoVeiculo + 0.01);
+    if (ColideParedao(Desejado, Offset))
         return false;
     return true;
 }
@@ -392,14 +449,14 @@ bool VeiculoPodeAvancar(Ponto PontoAtual, Ponto Desejado) {
 void rotacionaVeiculo(unsigned char key) {
     if (handleGameOver())
         return;
-    if (key != 'a' && key != 'A') {
+    if (key != 'a' && key != 'A' && key != 'd' && key != 'D') {
         cout << "Tecla " << key << " invalida para rotacao do veiculo" << endl;
         return;
     }
-    if (key == 'a') {
-        AnguloVeiculo.y -= 1.0f;
-    } else if (key == 'A') {
+    if (key == 'a' || key == 'A') {
         AnguloVeiculo.y += 1.0f;
+    } else if (key == 'd' || key == 'D') {
+        AnguloVeiculo.y -= 1.0f;
     }
     if ((AnguloVeiculo.y < -360) || (AnguloVeiculo.y > 360)) {
         AnguloVeiculo.y = 0;
@@ -453,11 +510,10 @@ Ponto CalculaBezier3(Ponto PC[], double t) {
 }
 
 void DesenhaProjetil() {
-    if (handleGameOver())
-        return;
     double DeltaT = 1.0 / 50;
     while (deslocamentoProjetil < 1.0) {
         Ponto P = CalculaBezier3(PontosBezier, deslocamentoProjetil);
+        Ponto OffsetProjetil = Ponto(2, 2, 2);
 
         if (ColideVeiculo()) {
             cout << "Voce se matou : (" << endl;
@@ -467,7 +523,7 @@ void DesenhaProjetil() {
             break;
         }
 
-        if (ColideParedao(P)) {
+        if (ColideParedao(P, OffsetProjetil)) {
             cout << "Voce acertou no paredao : )\t+5 pontos" << endl;
             QuebraParedao(P);
             pontuacao += 5.0f;
@@ -475,15 +531,14 @@ void DesenhaProjetil() {
             break;
         }
 
-        if (ColidePiso(P)) {
+        if (ColideChao(P)) {
             cout << "Voce atirou no chao : (\t-5 pontos" << endl;
             pontuacao -= 5.0f;
             deslocamentoProjetil = 1.0f;
             break;
         }
 
-        Ponto Offset = Ponto(1, 1, 1);
-        int animigo = ColideAnimigo(P, Offset);
+        int animigo = ColideAnimigo(P, OffsetProjetil);
         if (animigo != 0) {
             bool eraAmigo = animigo == 1;
             if (eraAmigo) {
@@ -497,6 +552,7 @@ void DesenhaProjetil() {
                 if (inimigosCount == 0) {
                     cout << "Voce matou todos os inimigos : )" << endl;
                     gameOver = true;
+                    handleGameOver();
                 }
             }
             deslocamentoProjetil = 1.0f;
@@ -527,13 +583,15 @@ bool ColideVeiculo() {
     return AnguloCanhao.x <= -90;
 }
 
-bool ColideParedao(Ponto P) {
+bool ColideParedao(Ponto P, Ponto Offset) {
     if (handleGameOver())
         return false;
     int x = round(P.x);
     int y = round(P.y);
     int z = round(P.z);
-    if (x < 0 || x >= sceneWidth || z != sceneDepth / 2 || y < 0 || y >= wallHeight)
+    if ((x + Offset.x < 0 || x - Offset.x >= sceneWidth)
+        || (z + Offset.z < (sceneDepth / 2) - Offset.z || z - Offset.z >= (sceneDepth / 2) + Offset.z)
+        || (y + Offset.y < 0 || y - Offset.y >= wallHeight))
         return false;
     return wallGrid[x][y];
 }
@@ -578,7 +636,7 @@ void QuebraParedao(Ponto P) {
         wallGrid[x + 1][y - 1] = false;    
 }
 
-bool ColidePiso(Ponto P) {
+bool ColideChao(Ponto P) {
     if (handleGameOver())
         return false;
     return P.y < 0;
@@ -705,8 +763,8 @@ void init(void) {
         if (showTexture) {
             // Habilita o uso de textura
             glEnable(GL_TEXTURE_2D);
-            texturaPiso = LoadTexture("chaograma.jpg");
-            texturaParedao = LoadTexture("paredeTijolo.jpg");
+            texturaChao = LoadTexture("chaofutebol.jpg");
+            texturaParedao = LoadTexture("paredeTijolos.jpg");
             texturaVeiculo = LoadTexture("camuflado.jpg");
             texturaCanhao = LoadTexture("metal.jpg");
         } else {
@@ -720,7 +778,7 @@ void init(void) {
     // Dá as boas-vindas ao usuário
     DisplayMenu();
 
-    sideView = false;
+    sideView = true;
 
     inimigosCount = animigosCount / 2;
     pontuacao = 0.0f;
@@ -751,7 +809,7 @@ void init(void) {
 
     PosicaoRelativaCamera = Ponto(0, 2, -5);
     TamanhoVeiculo = Ponto(2, 1, 3);
-    distanciaMovimentoVeiculo = 1.0f;
+    distanciaMovimentoVeiculo = sceneWidth / 10.0f;
     TamanhoCanhao = Ponto(0.5, 0.5, 2.0);
     PosicaoVeiculo = Ponto(6, 0, 4);
     AnguloVeiculo = Ponto(0, 0, 0);
@@ -762,27 +820,6 @@ void init(void) {
     forcaCanhao = 25.0f;
     isShooting = false;
     deslocamentoProjetil = 1.0f;
-}
-
-void DesenhaAnimigos() {
-    for (int i = 0; i < animigosCount; i++) {
-        if (animigos[i].isAlive) {
-            Ponto posicao = animigos[i].posicao;
-            glPushMatrix();
-                float x = posicao.x;
-                float y = posicao.y;
-                float z = posicao.z;
-                glTranslatef(x, y, z);
-                glRotatef(-90, 1, 0, 0);
-                glScalef(0.08, 0.08, 0.08);
-                if (animigos[i].isFriend)
-                    defineCor(LimeGreen);
-                else
-                    defineCor(OrangeRed);
-                animigo.ExibeObjeto();
-            glPopMatrix();
-        }
-    }
 }
 
 void display(void) {
@@ -890,6 +927,8 @@ void keyboard(unsigned char key, int x, int y) {
             break;
         case 'a':
         case 'A':
+        case 'd':
+        case 'D':
             rotacionaVeiculo(key);
             break;
         case 'b':
