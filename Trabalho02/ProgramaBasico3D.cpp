@@ -83,8 +83,7 @@ bool ColideVeiculo();
 bool ColideParedao(Ponto P);
 void QuebraParedao(Ponto P);
 bool ColidePiso(Ponto P);
-Animigo* ColideAnimigo(Ponto P);
-bool MataAnimigo(Animigo* animigo);
+int ColideAnimigo(Ponto P);
 GLuint LoadTexture(const char *nomeTextura);
 void init(void);
 void display(void);
@@ -431,9 +430,10 @@ void DesenhaProjetil() {
             break;
         }
 
-        if (ColideAnimigo(P)) {
+        int animigo = ColideAnimigo(P);
+        if (animigo != 0) {
             cout << "Animigo" << endl;
-            bool eraAmigo = MataAnimigo(P);
+            bool eraAmigo = animigo == 1;
             pontuacao += eraAmigo ? -10.0f : 10.0f;
             deslocamentoProjetil = 1.0f;
             break;
@@ -505,7 +505,12 @@ bool ColidePiso(Ponto P) {
     return P.y < 0;
 }
 
-Animigo* ColideAnimigo(Ponto P) {
+int ColideAnimigo(Ponto P) {
+    /**
+     * 0: Nenhum
+     * 1: Amigo
+     * 2: Inimigo
+    */
     float offset = 1.0f;
     for (int i = 0; i < animigosCount; i++) {
         if (animigos[i].isAlive) {
@@ -513,15 +518,12 @@ Animigo* ColideAnimigo(Ponto P) {
             if (P.x >= posicao.x - offset && P.x <= posicao.x + offset &&
                 P.y >= posicao.y - offset && P.y <= posicao.y + offset &&
                 P.z >= posicao.z - offset && P.z <= posicao.z + offset) {
-                return &animigos[i];
+                    animigos[i].isAlive = false;
+                    return animigos[i].isFriend ? 1 : 2;
             }
         }
     }
-}
-
-bool MataAnimigo(Animigo* animigo) {
-    animigo -> isAlive = false;
-    return animigo -> isFriend;
+    return 0;
 }
 
 GLuint LoadTexture(const char *nomeTextura) {
