@@ -73,6 +73,11 @@ void rotacionaCanhao(unsigned char key);
 void atiraProjetil();
 Ponto CalculaBezier3(Ponto PC[], double t);
 void DesenhaProjetil();
+bool ColideParedao(Ponto P1);
+void QuebraParedao(Ponto P1);
+bool ColidePiso(Ponto P1);
+bool ColideAnimigo(Ponto P1);
+bool MataAnimigo(Ponto P1);
 GLuint LoadTexture(const char *nomeTextura);
 void init(void);
 void display(void);
@@ -164,23 +169,6 @@ void DesenhaParedao() {
                         glTranslated(0, 0, 1);
                     }
                 glPopMatrix();
-                glTranslated(1, 0, 0);
-            }
-        glPopMatrix();
-        if (showTexture)
-            glPopMatrix();
-    glPopMatrix();
-    glPushMatrix();
-        if (showTexture) {
-            glPushMatrix();
-                glBindTexture(GL_TEXTURE_2D, texturaPiso);
-        } else {
-            defineCor(DarkBrown);
-        }
-        glTranslated(PosicaoParedao.x, PosicaoParedao.y, PosicaoParedao.z);
-        glPushMatrix();
-            for (int x = 0; x < sceneWidth; x++) {
-                DesenhaLadrilho();
                 glTranslated(1, 0, 0);
             }
         glPopMatrix();
@@ -404,11 +392,28 @@ void DesenhaProjetil() {
     while (deslocamentoProjetil < 1.0) {
         Ponto P = CalculaBezier3(PontosBezier, deslocamentoProjetil);
 
-        // TODO: Verificar colisões (parede, inimigos, chão)
-        // Se não colidiu em nada, continua o movimento
+        if (ColideParedao(P)) {
+            cout << "Colisao com parede" << endl;
+            P.imprime("Sou um ponto", "\n");
+            QuebraParedao(P);
+            pontuacao += 5.0f;
+            deslocamentoProjetil = 1.0f;
+            break;
+        }
 
-        cout << "Deslocamento: " << deslocamentoProjetil << endl;
-        P.imprime("Sou um ponto", "\n");
+        if (ColidePiso(P)) {
+            pontuacao -= 5.0f;
+            deslocamentoProjetil = 1.0f;
+            break;
+        }
+
+        if (ColideAnimigo(P)) {
+            bool eraAmigo = MataAnimigo(P);
+            pontuacao += eraAmigo ? -10.0f : 10.0f;
+            deslocamentoProjetil = 1.0f;
+            break;
+        }
+
         glPushMatrix();
             glColor3f(0.0f, 0.0f, 0.0f);
             glTranslated(P.x, P.y, P.z);
@@ -425,6 +430,59 @@ void DesenhaProjetil() {
             glutSolidSphere(TamanhoCanhao.x * 0.8, 20, 20);
         glPopMatrix();
     }
+}
+
+bool ColideParedao(Ponto P1) {
+    int x = round(P1.x);
+    int y = round(P1.y);
+    int z = round(P1.z);
+    if (x < 0 || x >= sceneWidth || z != sceneDepth / 2 || y < 0 || y >= wallHeight)
+        return false;
+    return wallGrid[x][z];
+}
+
+void QuebraParedao(Ponto P1) {
+    int x = round(P1.x);
+    int y = round(P1.y);
+    int z = round(P1.z);
+    wallGrid[x][y] = false;
+    cout << "Quebrando parede em " << x << ", " << y << ", " << z << endl;
+
+    // Quebra vizinho superior esquerdo
+    wallGrid[x - 1][y + 1] = false;
+
+    // Quebra vizinho superior
+    wallGrid[x][y + 1] = false;
+
+    // Quebra vizinho superior direito
+    wallGrid[x + 1][y + 1] = false;
+
+    // Quebra vizinho esquerdo
+    wallGrid[x - 1][y] = false;
+
+    // Quebra vizinho direito
+    wallGrid[x + 1][y] = false;
+
+    // Quebra vizinho inferior esquerdo
+    wallGrid[x - 1][y - 1] = false;
+
+    // Quebra vizinho inferior
+    wallGrid[x][y - 1] = false;
+
+    // Quebra vizinho inferior direito
+    wallGrid[x + 1][y - 1] = false;    
+}
+
+bool ColidePiso(Ponto P1) {
+    return false;
+}
+
+bool ColideAnimigo(Ponto P1) {
+    return false;
+}
+
+bool MataAnimigo(Ponto P1) {
+    return false;
 }
 
 GLuint LoadTexture(const char *nomeTextura) {
@@ -531,7 +589,7 @@ void init(void) {
     for (int i = 0; i < sceneWidth; i++)
         for (int j = 0; j < wallHeight; j++)
             wallGrid[i][j] = true;
-    PosicaoParedao = Ponto(0, -1, sceneDepth / 2);
+    PosicaoParedao = Ponto(0, -0.5, sceneDepth / 2);
 
     // Setup friends and enemies
     srand(time(NULL));
@@ -578,7 +636,7 @@ void DesenhaAnimigos() {
                 float z = posicao.z;
                 glTranslatef(x, y, z);
                 glRotatef(-90, 1, 0, 0);
-                glScalef(0.1, 0.1, 0.1);
+                glScalef(0.08, 0.08, 0.08);
                 if (animigos[i].isFriend)
                     defineCor(LimeGreen);
                 else

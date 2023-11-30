@@ -25,8 +25,6 @@ public:
     unsigned int getNFaces();
     void LeObjeto (char *Nome);
     void ExibeObjeto();
-    float posX, posY, posZ;
-    bool vivo;
 };
 
 #endif

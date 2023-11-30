@@ -542,7 +542,7 @@
 1700874912 source:f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\ponto.cpp
 	"Ponto.h"
 
-1701315553 source:f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\programabasico3d.cpp
+1701321418 source:f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\programabasico3d.cpp
 	<iostream>
 	<cmath>
 	<ctime>
@@ -661,12 +661,12 @@
 
 1701304125 f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\soil\soil.h
 
-1701311746 source:f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\objeto3d.cpp
+1701318470 source:f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\objeto3d.cpp
 	<cstdlib>
 	"Objeto3D.h"
 	"Ponto.h"
 
-1701311490 f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\objeto3d.h
+1701318455 f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\objeto3d.h
 	<iostream>
 	<fstream>
 	<glut.h>
@@ -721,4 +721,12 @@
 1701304125 f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\soil\stbi_dds_aug.h
 
 1701304125 f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\soil\stbi_dds_aug_c.h
+
+1701317152 f:\programming\github\engenhariasoftwarepucrs\computacao_grafica\trabalho02\envelope.h
+	<iostream>
+	<windows.h>
+	<glut.h>
+	<GLUT/glut.h>
+	<glut.h>
+	"Ponto.h"
 
