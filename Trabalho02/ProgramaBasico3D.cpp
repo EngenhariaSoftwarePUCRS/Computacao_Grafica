@@ -115,6 +115,7 @@ Ponto AnguloCanhao;
 Ponto DirecaoCanhao;
 float forcaCanhao;
 
+float pontuacao;
 Ponto PontosBezier[3];
 bool isShooting;
 float deslocamentoProjetil;
@@ -191,13 +192,14 @@ void DesenhaParedao() {
 void DesenhaLadrilho() {
     // Desenha quadrado preenchido
     glBegin(GL_QUADS);
-        glNormal3f(0,1,0);
-        glVertex3f(-0.5f, 0.0f, -0.5f);
-        glTexCoord2f(1.0f, 0.0f);
-        glVertex3f(-0.5f, 0.0f, 0.5f);
-        glTexCoord2f(1.0f, 1.0f);
-        glVertex3f(0.5f, 0.0f, 0.5f);
+        glNormal3f(0, 1, 0);
         glTexCoord2f(0.0f, 1.0f);
+        glVertex3f(-0.5f, 0.0f, -0.5f);
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex3f(-0.5f, 0.0f, 0.5f);
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex3f(0.5f, 0.0f, 0.5f);
+        glTexCoord2f(1.0f, 1.0f);
         glVertex3f(0.5f, 0.0f, -0.5f);
     glEnd();
 
@@ -428,8 +430,6 @@ void DesenhaProjetil() {
 GLuint LoadTexture(const char *nomeTextura) {
     GLenum errorCode;
     GLuint IdTEX;
-    // Habilita o uso de textura
-    glEnable(GL_TEXTURE_2D);
 
     // Define a forma de armazenamento dos pixels na textura (1= alihamento por byte)
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -450,7 +450,11 @@ GLuint LoadTexture(const char *nomeTextura) {
     // Carrega a imagem
     ImageClass Img;
 
-    int r = Img.Load(nomeTextura);
+    char* imagesPath = "assets/";
+    char* fullPath = new char[strlen(imagesPath) + strlen(nomeTextura) + 1];
+    strcpy(fullPath, imagesPath);
+    strcat(fullPath, nomeTextura);
+    int r = Img.Load(fullPath);
     if (!r) {
         cout << "Erro lendo imagem " << nomeTextura << endl;
         exit(1);
@@ -505,10 +509,16 @@ void init(void) {
 
     glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
     if (ModoDeExibicao) {
-        texturaPiso = LoadTexture("assets/chaograma.jpg");
-        texturaParedao = LoadTexture("assets/paredePedra.jpg");
-        texturaVeiculo = LoadTexture("assets/camuflado.jpg");
-        texturaCanhao = LoadTexture("assets/metal.jpg");
+        if (showTexture) {
+            // Habilita o uso de textura
+            glEnable(GL_TEXTURE_2D);
+            texturaPiso = LoadTexture("chaograma.jpg");
+            texturaParedao = LoadTexture("paredeTijolo.jpg");
+            texturaVeiculo = LoadTexture("camuflado.jpg");
+            texturaCanhao = LoadTexture("metal.jpg");
+        } else {
+            glDisable(GL_TEXTURE_2D);
+        }
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     } else {
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -516,11 +526,12 @@ void init(void) {
 
     sideView = false;
 
+    pontuacao = 0.0f;
     // Reset wall grid
-    PosicaoParedao = Ponto(0, -1, sceneDepth / 2);
     for (int i = 0; i < sceneWidth; i++)
         for (int j = 0; j < wallHeight; j++)
             wallGrid[i][j] = true;
+    PosicaoParedao = Ponto(0, -1, sceneDepth / 2);
 
     // Setup friends and enemies
     srand(time(NULL));
@@ -676,9 +687,11 @@ void keyboard(unsigned char key, int x, int y) {
             break;
         case 'c':
             forcaCanhao += 0.5f;
+            cout << "+Forca do canhao: " << forcaCanhao << endl;
             break;
         case 'C':
             forcaCanhao -= 0.5f;
+            cout << "-Forca do canhao: " << forcaCanhao << endl;
             break;
         case ' ':
             if (isShooting)
