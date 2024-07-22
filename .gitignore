@@ -5,3 +5,6 @@ OpenGL.xcodeproj/
 
 # Object Files
 *.o
+
+# Trabalho 02
+**/*.mp4
